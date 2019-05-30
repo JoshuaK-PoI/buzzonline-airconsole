@@ -5,29 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>BuzzOnline - CONTROLLER</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400,900" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+
 </head>
 <body>
     
-    <button id="btn-msg">Send Message</button>
 
-
+        <img src="img/cards/buzzonline__playingcard_C12.png" height="300" >
     <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
+    <script type="text/javascript" src="js/buzzonline-controller.js"></script>
     <script type="text/javascript">
-    var airconsole = new AirConsole();
-
-    // When we press our button, we send a message to the screen
-    document.getElementById('btn-msg').addEventListener("click", function() {
-      airconsole.message(AirConsole.SCREEN, "How are you?");
-    });
-
-    // Listen for messages
-    airconsole.onMessage = function(from, data) {
-
-      // Show message on device screen
-      var info = document.createElement('DIV');
-      info.innerHTML = data;
-      document.body.appendChild(info);
-    };
+        var airconsole = new AirConsole();
     </script>
 </body>
 </html>
