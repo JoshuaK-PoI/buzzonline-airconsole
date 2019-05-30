@@ -1,0 +1,56 @@
+<h4 class="center">
+    {bo.join.part1} <a href="/">buzzonline.power-of-interest.com</a> {bo.join.part2}
+</h4>
+
+<div class="gutter">
+    <h1 class="center">
+        {room.joincode}
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col compact outlined">
+            <h5 class="outlined-title">{bo.gamesettings}</h5>
+            <div class="outlined-content">
+                <form action="">
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in" disabled id="setting_jokers" onchange="server_changeSettings({
+                                setting: 'jokers'
+                            })">
+                            <span>{bo.jokers}</span>
+                            <a href="/kb/buzzonline_help#setting_jokers" target="new">
+                                <i class="material-icons">help_outline</i>
+                            </a>
+                        </label>
+                    </p>
+
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in " checked="checked" id="setting_difficultPyramid" onchange="server_changeSettings({
+                                setting: 'difficultPyramid'
+                            })">
+                            <span>{bo.difficultpyramid}</span>
+                            <a href="/kb/buzzonline_help#setting_pyramid" target="new">
+                                <i class="material-icons">help_outline</i>
+                            </a>
+                        </label>
+                    </p>
+
+                    <a class="btn btn-large right" onclick="server_start_game();">
+                        <span>{btn.startgame.text}</span>
+                        <i class="material-icons right">play_circle_outline</i>
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col compact">
+            <h5>{bo.joinedplayers}</h5>
+            <div id="_player_tags">
+
+            </div>
+        </div>
+    </div>

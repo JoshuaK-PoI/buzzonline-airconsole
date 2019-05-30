@@ -9,33 +9,31 @@
 
     <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400,900" rel="stylesheet">
 
-    <link href="dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
     <link href="dist/css/bootstrap-reboot.min.css" type="text/css" rel="stylesheet">
-
-    <link href="dist/css/style.css" rel="stylesheet" type="text/css">
+    <link href="dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
 
 </head>
 <body>
 
-        <div class="container">
-            <div class="row">
-                <div class="jumbotron">
-                    <h1 class="display-4">Hello, world!</h1>
-                    <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-                    <hr class="my-4">
-                    <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-                    <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-                </div>
+    <div class="container">
+        <div class="row">
+          <div class="col">
+            <div class="jumbotron">
+                <h1 class="display-4 text-center">BuzzOnline</h1>
+                <p class="lead text-center">Welcome to BuzzOnline! Get your drinks ready!</p>
+                <hr class="my-4">
+                <p class="text-center">Waiting for host to start the game...</p>
             </div>
+          </div>
         </div>
+    </div>
 
+    <div class="alert alert-primary" id="text-test">
 
+    </div>
     <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
+    <script type="text/javascript" src="js/airconsole-events.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="js/buzzonline.js"></script>
-    <script type="text/javascript">
-        /* Init Airconsole and BuzzOnline objects */
-        var airconsole = new AirConsole();
-        var buzzonline = new BuzzOnline();
-    </script>
 </body>
 </html>

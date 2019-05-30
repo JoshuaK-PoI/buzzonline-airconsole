@@ -31,7 +31,6 @@
   // Disabled comes first so active can properly restyle
   &.disabled,
   &:disabled {
-    opacity: $btn-disabled-opacity;
     @include box-shadow(none);
   }
 

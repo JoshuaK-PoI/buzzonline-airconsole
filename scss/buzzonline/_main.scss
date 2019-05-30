@@ -1,0 +1,84 @@
+/**
+  BuzzOnline - The AirConsole Adaptation
+
+  Copyright (c) Power of Interest, 2019
+
+
+  Stylesheets for BuzzOnline
+  To be used in conjunction with Twitter Bootstrap (https://getbootstrap.com)
+
+  See https://github.com/JoshuaK-PoI/buzz-online-airconsole
+
+*/
+
+/* Reset */
+html {
+  height: 100vh;
+  margin-top: 0;
+}
+
+.container {
+  height: calc(100% - 1.5rem);
+  margin-top: .75rem;
+}
+
+body {
+  height: calc(100% - .75rem);
+  background: url("../img/buzzonline__standard-background.png") center center no-repeat;
+}
+
+.bostart-jumbotron {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.bologo-img {
+  display: block;
+  width: 90%;
+  margin: 0 auto;
+  animation: growIn .7s ease-in-out;
+}
+
+.bostart1 {
+  opacity: 0;
+  animation: fadeSlideIn .5s ease-in-out .7s forwards;
+}
+
+.bostart2 {
+  opacity: 0;
+  animation: fadeSlideIn .5s ease-in-out 1s forwards;
+}
+
+.bostart3 {
+  opacity: 0;
+  animation: fadeSlideIn .5s ease-in-out 1.4s forwards;
+}
+
+@keyframes growIn {
+  0% {
+    width: 0;
+    height: 0;
+  }
+
+  75% {
+    width: 100%;
+  }
+
+  100% {
+    width: 90%;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    display: block;
+    margin-top: -20px;
+    opacity: 0;
+  }
+
+  to {
+    display: block;
+    margin-top: 0;
+    opacity: 1;
+  }
+}
