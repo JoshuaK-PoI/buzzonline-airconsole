@@ -5,8 +5,8 @@ const xhr = new XMLHttpRequest()
 
 /* General helper functions */
 // eslint-disable-next-line no-unused-vars
-function view(file, params = {}, callback) {
-  xhr.open('GET', `dist/templates/_${file}.html`, true)
+function view(file, params = {}) {
+  xhr.open('GET', `dist/templates/_${file}.html?_${new Date().getTime()}`, true)
   xhr.send()
   xhr.onreadystatechange = function () {
     if (xhr.readyState === RDYSTATE_READY && xhr.status === HTTPRESPONSE_OK) {
@@ -14,12 +14,15 @@ function view(file, params = {}, callback) {
 
       let querySelector = '#bo_viewport'
 
-      if (params.inject) {
-        querySelector = params.inject
+      if (params._inject) {
+        querySelector = params._inject
       }
 
-      document.querySelector(querySelector).innerHTML = res
-      callback()
+      if (params._append) {
+        document.querySelector(querySelector).insertAdjacentHTML('beforeend', res)
+      } else {
+        document.querySelector(querySelector).innerHTML = res
+      }
     }
   }
 }
@@ -34,4 +37,10 @@ function buildTemplate(file, params) {
   }
 
   return file
+}
+
+// eslint-disable-next-line no-unused-vars
+function removeFromView(element) {
+  element = document.querySelector(element)
+  element.parentNode.removeChild(element)
 }

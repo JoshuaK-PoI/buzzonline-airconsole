@@ -27,13 +27,24 @@ buzzonline.ac.onMessage = function (deviceId, data) {
   this.dispatchEvent(deviceId, data)
 }
 
+/* Screen updater */
+buzzonline.ac.on('VIEW_UPDATE', (deviceId, params) => {
+  // eslint-disable-next-line no-undef
+  view(params._filename, params)
+})
+buzzonline.ac.on('VIEW_UPDATE_REMOVE', (deviceId, params) => {
+  // eslint-disable-next-line no-undef
+  removeFromView(params._element)
+})
+
 buzzonline.init_ = function () {
   this.gameState = {
     rounds: 0,
     phase: 0,
     subPhase: 0,
     optionJoker: false,
-    optionDifficultPyramid: false
+    optionDifficultPyramid: false,
+    players: {}
   }
 }
 
@@ -67,8 +78,56 @@ buzzonline.function.masterChangeOption = function (deviceId, optionData) {
 /* Internal functions */
 buzzonline.startDeviceConnectionListener = function () {
   this.ac.onConnect = function (deviceId) {
-    buzzonline.ac.sendEvent(deviceId, 'VIEW_UPDATE', {
-      _filename: 'start'
+    /* Store some player data */
+
+    buzzonline.gameState.players[deviceId] = {
+      playerId: buzzonline.ac.convertDeviceIdToPlayerNumber(deviceId),
+      nickname: buzzonline.ac.getNickname(deviceId),
+      profilePicture: buzzonline.ac.getProfilePicture(deviceId)
+    }
+
+    /* Show player data on the screen */
+    // eslint-disable-next-line no-undef
+    buzzonline.ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
+      _filename: 'component_player_tag',
+      _inject: '#bo_playerDrawer',
+      _append: true,
+      'player.id': deviceId,
+      'player.name': buzzonline.ac.getNickname(deviceId),
+      'player.profilePicture': buzzonline.ac.getProfilePicture(deviceId)
     })
+
+    /* Send the start screen to the player */
+    const gameMaster = typeof buzzonline.gameState.gameMaster === 'string' ? buzzonline.gameState.gameMaster : 'the gamemaster'
+
+    let options = {
+      _filename: 'start',
+      'btn.class': 'btn btn-outline-primary',
+      'btn.disabled': 'disabled="disabled"',
+      'btn.text': `Wait until ${gameMaster} starts the game`
+    }
+
+    if (deviceId === buzzonline.ac.getMasterControllerDeviceId()) {
+      buzzonline.gameState.gameMaster = buzzonline.ac.getNickname(deviceId)
+      options = {
+        _filename: 'start',
+        'btn.class': 'btn btn-primary',
+        'btn.disabled': '',
+        'btn.text': 'Start Game'
+      }
+    }
+
+    buzzonline.ac.sendEvent(deviceId, 'VIEW_UPDATE', options)
+  }
+
+  this.ac.onDisconnect = function (deviceId) {
+    /* Remove player from the screen */
+    // eslint-disable-next-line no-undef
+    buzzonline.ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE_REMOVE', {
+      _element: `#bo_playerTag_${deviceId}`
+    })
+
+    /* Remove player from the game data */
+    delete buzzonline.gameState.players[deviceId]
   }
 }

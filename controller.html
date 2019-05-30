@@ -38,9 +38,11 @@
         };
 
         airconsole.on('VIEW_UPDATE', function (deviceId, params, context) {
-          view(params._filename, params, function(){
+          view(params._filename, params);
+        })
 
-          });
+        airconsole.on('VIEW_UPDATE_REMOVE', function (deviceId, params, context) {
+          removeFromView(params._element);
         })
     </script>
 </body>
