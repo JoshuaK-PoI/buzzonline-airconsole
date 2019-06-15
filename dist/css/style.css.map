@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"file": "style.css",
+	"sources": [
+		"../../scss/style.scss",
+		"../../scss/globals/_variables.scss",
+		"../../scss/globals/_scaffolding.scss",
+		"../../scss/modules/_main.scss"
+	],
+	"names": [],
+	"mappings": "AGAA,AAAA,CAAC,CAAC;EDSE,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC,GCRb"
+}

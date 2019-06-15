@@ -1,0 +1,41 @@
+// Variables for BuzzOnline
+// Copyright (C) Power of Interest, 2019
+
+// ------------------------------------
+//           # DEFINITIONS
+// ------------------------------------
+
+
+// -------------
+// Color Palette
+// -------------
+
+$color-primary: #001B2B;
+$color-secondary: #2E6690;
+$color-tertiary: #81C3D7;
+
+$color-text-primary: #D9DCD6;
+$color-text-secondary: $color-tertiary;
+$color-text-inverted: $color-primary;
+$color-text-emphasis: #FFC82E;
+
+$color-red: #BE2500;
+$color-text-red: $color-red;
+$color-green: #487B00;
+$color-text-green: $color-green;
+
+
+// -----
+// Fonts
+// -----
+
+$font-light: 300;
+$font-regular: 400;
+$font-semibold: 600;
+$font-bold: 700;
+
+@mixin font-standard($font-weight: $font-regular) {
+    font-family: 'Hind Guntur', sans-serif;
+    font-weight: $font-weight;
+
+}

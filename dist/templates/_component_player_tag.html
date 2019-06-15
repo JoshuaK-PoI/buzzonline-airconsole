@@ -1,4 +1,12 @@
-<div class="chip" id="bo_playerTag_{player.id}">
+<div class="chip {player.active}" id="bo_playerTag_{player.id}">
     <img class="bo-playertag-profile" src="{player.profilePicture}" alt="{player.name}"/>
-    {player.name}
+    <div class="collection-content">
+        <span>{player.name}</span>
+        <div class="collection-addon">
+            <img src="dist/img/beer_mono_white.png" alt="Drinks" />
+            <span id="drinks_{player.id}">
+                {player.drinkAmt}
+            </span>
+        </div>
+    </div>
 </div>

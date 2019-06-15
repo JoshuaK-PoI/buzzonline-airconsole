@@ -1,40 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BuzzOnline - SCREEN</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>BuzzOnline - SCREEN</title>
 
-
-    <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400,900" rel="stylesheet">
-
-    <link href="dist/css/bootstrap-reboot.min.css" type="text/css" rel="stylesheet">
-    <link href="dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css?family=Hind+Guntur:300,400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/dist/css/buzzonline.css">
 </head>
 <body>
-
-    <div class="container">
+    <div class="container" id="bo_viewport">
         <div class="row">
           <div class="col">
-            <div class="jumbotron">
-                <h1 class="display-4 text-center">BuzzOnline</h1>
-                <p class="lead text-center">Welcome to BuzzOnline! Get your drinks ready!</p>
+            <div class="jumbotron bostart-jumbotron">
+                <div class="bigscreen-50">
+                  <img class="bologo-img" src="dist/img/BOLogo.png" />
+                </div>
+                <h5 class="lead text-center">Welcome to BuzzOnline! Get your drinks ready!</h5>
                 <hr class="my-4">
                 <p class="text-center">Waiting for host to start the game...</p>
             </div>
           </div>
         </div>
-
       <div class="bo-player-drawer" id="bo_playerDrawer">
-
       </div>
     </div>
-
     <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
-    <script type="text/javascript" src="js/airconsole-events.js"></script>
-    <script type="text/javascript" src="js/functions.js"></script>
-    <script type="text/javascript" src="js/buzzonline.js"></script>
+    <script type="text/javascript" src="dist/js/airconsole-events.js"></script>
+    <script type="text/javascript" src="dist/js/functions.js"></script>
+    <script type="text/javascript" src="dist/js/buzzonline.js"></script>
 </body>
 </html>

@@ -1,49 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BuzzOnline - CONTROLLER</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>BuzzOnline - CONTROLLER</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400,900" rel="stylesheet">
-
-    <link href="dist/css/bootstrap-reboot.min.css" type="text/css" rel="stylesheet">
-    <link href="dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css?family=Hind+Guntur:300,400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/dist/css/buzzonline.css">
 </head>
 <body>
 
-    <div class="container" id="bo_viewport">
+  <div class="container" id="bo_viewport">
 
-    </div>
+  </div>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
-    <script type="text/javascript" src="js/airconsole-events.js"></script>
-    <script type="text/javascript" src="js/functions.js"></script>
-    <script type="text/javascript">
-        var airconsole = new AirConsole();
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
+  <script type="text/javascript" src="dist/js/airconsole-events.js"></script>
+  <script type="text/javascript" src="dist/js/functions.js"></script>
+  <script type="text/javascript">
+      var airconsole = new AirConsole();
 
-        function testMsg() {
-          airconsole.sendEvent(AirConsole.SCREEN, 'FUNCTION', {
-            function: "receiveStart"
-          });
-        };
+      function testMsg() {
+        airconsole.sendEvent(AirConsole.SCREEN, 'FUNCTION', {
+          function: "receiveStart"
+        });
+      };
 
-        airconsole.onMessage = function(device_id, data) {
-          // Put this into your onMessage function to listen for events
-          this.dispatchEvent(device_id, data);
-        };
+      airconsole.onMessage = function(device_id, data) {
+        // Put this into your onMessage function to listen for events
+        this.dispatchEvent(device_id, data);
+      };
 
-        airconsole.on('VIEW_UPDATE', function (deviceId, params, context) {
-          view(params._filename, params);
-        })
+      airconsole.on('VIEW_UPDATE', function (deviceId, params, context) {
+        view(params._filename, params);
+      })
 
-        airconsole.on('VIEW_UPDATE_REMOVE', function (deviceId, params, context) {
-          removeFromView(params._element);
-        })
-    </script>
+      airconsole.on('VIEW_UPDATE_REMOVE', function (deviceId, params, context) {
+        removeFromView(params._element);
+      })
+
+
+      if(window.self === window.top) {
+        /* Not in iFrame, so run test data */
+        view('start', {});
+      }
+  </script>
 </body>
 </html>
