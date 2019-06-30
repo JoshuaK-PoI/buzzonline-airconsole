@@ -2,50 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <!-- Chrome, Firefox OS and Opera -->
+  <meta name="theme-color" content="#001b2b">
+  <!-- Windows Phone -->
+  <meta name="msapplication-navbutton-color" content="#001b2b">
+  <!-- iOS Safari -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="#001b2b">
+
   <title>BuzzOnline - CONTROLLER</title>
 
   <link href="https://fonts.googleapis.com/css?family=Hind+Guntur:300,400,500,600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/dist/css/buzzonline.css">
+  <link rel="stylesheet" href="/dist/css/style.css?v=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
 </head>
 <body>
 
-  <div class="container" id="bo_viewport">
+  <div class="container bo-client-container" id="bo_viewport" style="overflow: scroll">
 
   </div>
-
+  <div class="bo-client-cards">
+    
+  </div>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
   <script type="text/javascript" src="dist/js/airconsole-events.js"></script>
   <script type="text/javascript" src="dist/js/functions.js"></script>
+  <script type="text/javascript" src="dist/js/functions-controller.js"></script>
   <script type="text/javascript">
-      var airconsole = new AirConsole();
 
-      function testMsg() {
-        airconsole.sendEvent(AirConsole.SCREEN, 'FUNCTION', {
-          function: "receiveStart"
-        });
-      };
-
-      airconsole.onMessage = function(device_id, data) {
-        // Put this into your onMessage function to listen for events
-        this.dispatchEvent(device_id, data);
-      };
-
-      airconsole.on('VIEW_UPDATE', function (deviceId, params, context) {
-        view(params._filename, params);
-      })
-
-      airconsole.on('VIEW_UPDATE_REMOVE', function (deviceId, params, context) {
-        removeFromView(params._element);
-      })
-
-
+      /**
+       *
+       *
+       *  DEBUG CODE HERE
+       *
+       */
       if(window.self === window.top) {
         /* Not in iFrame, so run test data */
-        view('start', {});
+        addcard('client_right_answer', {
+          'card.img_src': 'buzzonline__playingcard_C11.png'
+        });
+
       }
   </script>
 </body>

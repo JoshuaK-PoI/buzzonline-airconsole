@@ -1,0 +1,65 @@
+// Responsivity flags and settings
+// Copyright (C) Power of Interest, 2019
+
+
+// ----------------
+//   Definitions
+// ----------------
+
+$screen-small:    330px;
+$screen-medium:   370px;
+$screen-large:    420px;
+
+
+
+// ----------------
+//   Restrictions
+// ----------------
+
+@mixin screen-size($size) {
+    @if $size == xsmall {
+        @media (max-width: $screen-small) {@content;}
+    } @else if $size == small {
+        @media (min-width: $screen-small) and (max-width: $screen-medium) { @content; }
+    } @else if $size == medium {
+        @media (min-width: $screen-medium) and (max-width: $screen-large) { @content; }
+    } @else if $size == large {
+        @media (min-width: $screen-large) { @content; }
+    }
+}
+
+* {
+
+    @include screen-size(small) {
+        .hide-on-med-and-down,
+        .hide-on-small,
+        .hide-on-small-and-up {
+            display: none;
+        }
+    }
+
+    @include screen-size(xsmall) {
+        .hide-on-med-and-down,
+        .hide-on-small,
+        .hide-below-small {
+            display: none;
+        }
+    }
+
+    @include screen-size(medium) {
+        .hide-on-med-and-down,
+        .hide-on-med,
+        .hide-on-med-and-up,
+        .hide-on-small-and-up {
+            display: none;
+        }
+    }
+
+    @include screen-size(large) {
+        .hide-on-large,
+        .hide-on-med-and-up,
+        .hide-on-small-and-up {
+            display: none;
+        }
+    }
+}

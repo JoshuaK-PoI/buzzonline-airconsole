@@ -7,24 +7,28 @@
   <title>BuzzOnline - SCREEN</title>
 
   <link href="https://fonts.googleapis.com/css?family=Hind+Guntur:300,400,500,600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/dist/css/buzzonline.css">
+  <link rel="stylesheet" href="/dist/css/style.css">
 </head>
 <body>
     <div class="container" id="bo_viewport">
         <div class="row">
           <div class="col">
             <div class="jumbotron bostart-jumbotron">
-                <div class="bigscreen-50">
-                  <img class="bologo-img" src="dist/img/BOLogo.png" />
+              <img class="bologo-img" src="dist/img/buzzonline-logo.png" />
+              <h2 class="lead text-center text-light">Get your drink ready and prepare for fast action!</h2>
+              <div class="options-panel">
+                <h4 class="options-text text-secondary-light">Options:</h4>
+                <div class="options-content">
+                    <button class="btn btn-outlined btn-text-smaller">Jokers (Coming Soon)</button>
+                    <button class="btn btn-outlined btn-text-smaller">Alternative Pyramid (Coming Soon)</button>
                 </div>
-                <h5 class="lead text-center">Welcome to BuzzOnline! Get your drinks ready!</h5>
-                <hr class="my-4">
-                <p class="text-center">Waiting for host to start the game...</p>
+              </div>
+              <h4 class="text-center text-secondary-light">Waiting for <strong id="start_gamemaster_name">The Gamemaster</strong> to start the game...</h4>
             </div>
           </div>
         </div>
-      <div class="bo-player-drawer" id="bo_playerDrawer">
-      </div>
+    </div>
+    <div class="bo-player-drawer" id="bo_playerDrawer">
     </div>
     <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
     <script type="text/javascript" src="dist/js/airconsole-events.js"></script>

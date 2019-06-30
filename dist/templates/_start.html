@@ -1,10 +1,10 @@
 <div class="jumbotron bostart-jumbotron">
 
-  <img class="bologo-img" src="dist/img/BOLogo.png" />
-  <div class="bostart1 hide-for-small">
-    <h5 class="lead">
-        Welcome to BuzzOnline! Get your drinks ready and prepare for fast action!
-    </h5>
+  <img class="bologo-img" src="dist/img/buzzonline-logo.png" />
+  <div class="bostart1 hide-on-small">
+    <h3 class="text-center text-light">
+        Get your drinks ready!
+    </h3>
     <hr class="my-4" />
   </div>
   <p class="bostart2 smaller-text">
@@ -13,14 +13,14 @@
     or exit this game if you are under legal drinking age or drinking is not allowed otherwise.
     By continuing, you acknowledge and accept these terms. Please drink responsibly.
   </p>
-  <div class="game-options form-group form-check" {btn.hide}>
+  <div class="game-options form-group form-check hidden">
     <input type="checkbox" name="optionJokers" id="optionJokers" class="form-check-input">
     <label class="form-check-label" for="optionJokers">Jokers</label>
   </div>
-  <div class="game-options form-group form-check" {btn.hide}>
+  <div class="game-options form-group form-check hidden">
     <input type="checkbox" name="optionJokers" id="optionDiificultPyramid" class="form-check-input">
     <label class="form-check-label" for="optionDifficultPyramid">Difficult Pyramid</label>
   </div>
-  <button class="{btn.class} btn-lg btn-block bostart3" href="#" role="button" {btn.disabled}>{btn.text}</button>
-  <button class="btn btn-lg btn-block btn-secondary" onclick="airconsole.sendEvent(AirConsole.SCREEN, 'HOW_TO_PLAY')" {btn.hide}>How to Play</button>
+  <button class="btn {btn.class} btn-lg btn-block bostart3 {btn.text_smaller}" href="#" role="button" {btn.disabled} onclick="ac.sendEvent(AirConsole.SCREEN, 'FUNCTION', {function: 'startGame'})">{btn.text}</button>
+  <button class="btn btn-outlined {master.hide_elements}" onclick="airconsole.sendEvent(AirConsole.SCREEN, 'HOW_TO_PLAY')">How to Play</button>
 </div>

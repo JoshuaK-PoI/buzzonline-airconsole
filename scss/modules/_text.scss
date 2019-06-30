@@ -1,0 +1,86 @@
+// Text and typography
+// Copyright (C) Power of Interest, 2019
+
+
+
+// ----------------
+// Text scaffolding
+// ----------------
+
+* {
+    @include font-standard;
+    @include font;
+}
+
+h4,
+h5,
+h6 {
+    margin-block-start: .3rem;
+    margin-block-end: .3rem;
+}
+
+
+// Define sizes:
+h1 {
+    font-size: 3rem;
+}
+
+h2 {
+    font-size: 2.5rem;
+}
+
+h3 {
+    font-size: 2rem;
+}
+
+h4 {
+    font-size: 1.8rem;
+}
+
+h5 {
+    font-size: 1.3rem;
+}
+
+h6 {
+    font-size: 1rem;
+}
+
+// -----------
+// Text styles
+// -----------
+
+strong {
+    font-weight: $font-bold;
+}
+
+.text-bold {
+    @include font($font-bold, $color-text-primary)
+}
+
+.text-light {
+    @include font($font-light, $color-text-primary)
+}
+
+.text-emphasize {
+    @include font($font-bold, $color-text-emphasis)
+}
+
+.text-emphasize-light {
+    @include font($font-light, $color-text-emphasis)
+}
+
+.text-secondary {
+    @include font($font-bold, $color-text-secondary)
+}
+
+.text-secondary-light {
+    @include font($font-light, $color-text-secondary)
+}
+
+.text-center {
+    text-align: center;
+}
+
+.smaller-text {
+    font-size: 0.8rem;
+}

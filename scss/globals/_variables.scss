@@ -10,32 +10,86 @@
 // Color Palette
 // -------------
 
-$color-primary: #001B2B;
-$color-secondary: #2E6690;
-$color-tertiary: #81C3D7;
+//Primary
+$color-dark-blue:   rgb(0, 27, 43);
+$color-blue:        rgb(46, 102, 144);
+$color-light-blue:  rgb(129, 195, 215);
 
-$color-text-primary: #D9DCD6;
-$color-text-secondary: $color-tertiary;
-$color-text-inverted: $color-primary;
-$color-text-emphasis: #FFC82E;
+//Text
+$color-white:       rgb(217, 220, 214);
+$color-yellow:      rgb(255, 200, 46);
 
-$color-red: #BE2500;
-$color-text-red: $color-red;
-$color-green: #487B00;
-$color-text-green: $color-green;
+//Accent
+$color-red:         rgb(190, 37, 0);
+$color-green:       rgb(72, 123, 0);
+
+
+// -----------------
+// Color Definitions
+// -----------------
+
+$color-primary:         $color-dark-blue;
+$color-secondary:       $color-blue;
+$color-accent:          $color-light-blue;
+
+$background-color:      $color-primary;
+$player-drawer-color:   $color-secondary; 
+
+$color-text-primary:    $color-white;
+$color-text-secondary:  $color-light-blue;
+$color-text-emphasis:   $color-yellow;
+$color-text-red:        $color-red;
+$color-text-green:      $color-green;
 
 
 // -----
 // Fonts
 // -----
 
-$font-light: 300;
-$font-regular: 400;
+$font-light:    300;
+$font-regular:  400;
 $font-semibold: 600;
-$font-bold: 700;
+$font-bold:     700;
 
-@mixin font-standard($font-weight: $font-regular) {
-    font-family: 'Hind Guntur', sans-serif;
-    font-weight: $font-weight;
-
+@mixin font-standard() {
+    font-family:    'Hind Guntur', sans-serif;
+    line-height:    1.2;
 }
+
+@mixin font($font-weight: $font-regular, $font-color: $color-text-primary) {
+    color:          $font-color;
+    font-weight:    $font-weight;
+}
+
+
+// ------------------------------------
+//        # WEBSITE SCAFFOLDING
+// ------------------------------------
+
+
+//Player drawer
+
+$player-drawer-height:          64px;
+$player-drawer-width:           calc(100vw / 10);
+$player-drawer-chip-margin:     5px;
+$player-drink-icon-height:      20px;
+$player-image-width:            $player-drawer-height - (2 * $player-drawer-chip-margin);
+
+
+//Site container
+
+$container-padding:             32px;
+$border-radius-standard:        12px;
+
+$container-padding-compensation: 2 * $container-padding;
+$player-drawer-compensation:     $player-drawer-height + $container-padding-compensation;
+
+$container-height:              calc(100% - #{$player-drawer-compensation});
+$container-height-smaller:      calc(100% - #{$player-drawer-compensation} - #{$player-drawer-height});
+
+
+// ------------------------------------
+//         # SITE COMPONENTS
+// ------------------------------------
+$button-height: 64px;
+$button-margin-bottom: 8px;

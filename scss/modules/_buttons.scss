@@ -1,0 +1,71 @@
+
+@mixin btn-standard() {
+    font-size: 1.75rem;
+    display: block;
+    width: 100%;
+    max-width: 350px;
+    height: $button-height;
+    line-height: 4.5rem;
+    vertical-align: middle;
+    margin: 4px auto $button-margin-bottom auto;
+    transition: 0.1s;
+    border: 0;
+    border-radius: $border-radius-standard;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:focus {
+        outline: 0;
+    }
+}
+
+@mixin btn-specs($btn-color: $color-secondary, $text-color: $color-accent) {
+    background-color: $btn-color;
+    @include font($font-semibold, $text-color);
+}
+
+@mixin btn-active() {
+    @include btn-specs($color-accent, $color-primary);
+}
+
+.btn {
+    @include btn-standard;
+    &:hover, &:active {
+        @include btn-active;
+    }
+
+    &.red {
+        @include btn-specs($color-red !important, $color-text-primary);
+    }
+
+    &.green {
+        @include btn-specs($color-green !important, $color-text-primary);
+    }
+
+    &[disabled] {
+        @include btn-specs($color-primary !important, $color-text-secondary);
+    }
+
+    span {
+        height: $button-height;
+        line-height: $button-height;
+        vertical-align: middle;
+    }
+}
+
+.btn-primary {
+    @include btn-specs;
+}
+
+.btn-outlined {
+    @include btn-specs($color-primary, $color-accent);
+    border: 1px solid $color-secondary;
+}
+
+.btn-text-smaller {
+    font-size: 1.125rem;
+    line-height: 4rem;
+}
+

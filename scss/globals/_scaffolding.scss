@@ -2,11 +2,78 @@
 // Copyright (C) Power of Interest, 2019
 
 // -------
-// RESET
+// Mixins
 // -------
 
 
 @mixin reset {
     margin: 0;
     padding: 0;
+    height: 100%;
+}
+
+
+
+// ----------------------------------
+//          Page scaffolding
+// ----------------------------------
+
+
+html,
+body {
+    @include reset;
+}
+
+body {
+    background-color: $color-primary;
+}
+
+
+.container {
+    display: block;
+    height: $container-height;
+    padding: $container-padding;
+    &.smaller {
+        height: $container-height-smaller;    
+    }
+}
+
+// ----------------------------------
+// Color scaffolding
+// ----------------------------------
+.red {
+    background-color: $color-red;
+}
+
+.green {
+    background-color: $color-green;
+}
+
+
+// ----------------------------------
+// Page Elements
+// ----------------------------------
+
+hr {
+    border: 0;
+    border-top: 1px solid $color-text-primary;
+    opacity: 0.25;
+}
+
+img {
+    max-width: 100%;
+}
+
+// ----------------------
+// Standard page classes
+// ----------------------
+
+.hidden {
+    display: none !important;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }

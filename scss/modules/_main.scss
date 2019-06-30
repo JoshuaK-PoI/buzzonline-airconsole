@@ -1,3 +1,217 @@
-* {
-    @include reset;
+
+
+// -----------------------------------
+// Home - Title splash screen settings
+// -----------------------------------
+
+.bologo-img {
+    display: block;
+    max-height: 250px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.options-panel {
+    width: 50%;
+    margin: 0 auto;
+    border: 1px solid $color-secondary;
+    border-radius: $border-radius-standard;
+
+    .options-text {
+        position: absolute;
+        display: inline-block;
+        padding: 5px;
+        background-color: $color-primary;
+        transform: translate(40px,-23px);
+    }
+
+    .options-content {
+        position: relative;
+        text-align: center;
+        padding: 40px 0;
+    }
+}
+
+// ------------------------
+// BuzzOnline Player Drawer
+// ------------------------
+
+.bo-player-drawer {
+    background-color: $player-drawer-color;
+    height: $player-drawer-height;
+    overflow: hidden;
+
+    // Player chips
+    .chip {
+        display: inline-block;
+        height: calc(#{$player-drawer-height} - (2*#{$player-drawer-chip-margin}));
+        margin: $player-drawer-chip-margin;
+        border-radius: $border-radius-standard;
+        background-color: $color-primary;
+        overflow: hidden;
+        transition-duration: 0.3s;
+        
+        .bo-playertag-profile {
+            display: inline-block;
+            max-height: 100%;
+            max-width: $player-image-width;
+            position: absolute;
+        }
+
+        .collection-content {
+            display: inline-block;
+            overflow: hidden;
+            color: $color-text-primary;
+            height: 100%;
+            width: calc(#{$player-drawer-width} - #{$player-image-width});
+            margin-left: $player-image-width + 6px;
+            height: ($player-drawer-height - ($player-drawer-chip-margin * 2) );
+
+            span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: block;
+                height: ($player-drawer-height - ($player-drawer-chip-margin * 2) ) / 2;
+                line-height: 34px;
+                vertical-align: middle;
+            }
+
+            .collection-addon {
+                height: ($player-drawer-height - ($player-drawer-chip-margin * 2) ) / 2;
+            
+                img {
+                    height: $player-drink-icon-height;
+                    line-height: $player-drink-icon-height;
+                    vertical-align: middle;
+                }
+            
+                span {
+                    overflow: unset;
+                    display: inline-block;
+                }
+            }
+        }
+
+        &.active {
+            background-color: $color-green;
+        }
+    }
+}
+
+// --------------------------
+// Client Card Drawer
+// --------------------------
+
+.bo-client-cards {
+    display: block;
+    width: 100%;
+    height: $player-drawer-height;
+    margin: 0;
+    background-color: $color-secondary;
+    bottom: 0;
+    white-space: nowrap;
+    overflow: scroll hidden;
+    -webkit-overflow-scrolling: touch;
+    .card {
+        display: inline-flex;
+        align-items: center;
+        position: relative;
+        height: 100%;
+        max-width: 23%;
+        margin-right: 2px;
+        img {
+            max-height: 100%;
+            margin: auto;
+            box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    &.larger {
+        height: 2 * $player-drawer-height;       
+    }
+}
+
+// --------------------------
+//     Questionnaire screen
+// --------------------------
+.row,
+.master-playing-card,
+.card-content {
+    height: 100%;
+}
+
+
+.master-playing-card {
+    .card-content {
+        img {
+            display: block;
+            max-height: 100%;
+            margin: 20px auto;
+        }
+    }
+}
+
+.panel {
+    display: flex;
+    width: calc(100% - 40px);
+    border-radius: $border-radius-standard;
+    max-height: 30%;
+    min-height: 20%;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.card-panel {
+    height: 70%;
+}
+
+.drink-animation {
+    animation: drink-animation 1s forwards ease-in-out;
+}
+
+@keyframes drink-animation {
+    0% {
+        transform: rotate(0deg);
+    }
+    30% {
+        transform: translateY(-5px) rotate(-120deg);
+    }
+    60% {
+        transform: translateY(-8px) rotate(-120deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.bo-client-container,
+.bo-client-cards {
+    transition-duration: .5s;
+}
+
+.fadeout {
+    animation: fadeout .2s forwards;
+}
+
+.fadeout {
+    animation: fadein .2s forwards;
+}
+
+@keyframes fadeout {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes fadein {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
