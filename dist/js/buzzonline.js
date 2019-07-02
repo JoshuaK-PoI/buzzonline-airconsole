@@ -39,12 +39,10 @@ if(window.self === window.top) {
       _append: true,
       'player.id': i,
       'player.name': 'ABCDEFGHIJKLMNOPQ'+i,
-      'player.drinkAmt': Math.floor(Math.random() * 100),
-      'player.profilePicture': 'dist/img/default_pp.png',
+      'player.drink_amount': Math.floor(Math.random() * 100),
+      'player.profile_picture': 'dist/img/default_pp.png',
       'player.active': Math.floor(Math.random() * 10) > 5 ? 'active' : ''
-    })
-
-    
+    }) 
   }
 }
 /**
@@ -57,53 +55,53 @@ if(window.self === window.top) {
  */
 
 /* Use the event-driven AirConsole approach to determine functions */
-ac.onMessage = function (deviceId, data) {
-  this.dispatchEvent(deviceId, data)
+ac.onMessage = function (device_id, data) {
+  this.dispatchEvent(device_id, data)
 }
 
 /* Screen updater */
-ac.on('VIEW_UPDATE', (deviceId, params) => {
+ac.on('VIEW_UPDATE', (device_id, params) => {
   // eslint-disable-next-line no-undef
   view(params._filename, params)
 })
 
-ac.on('VIEW_UPDATE_REMOVE', (deviceId, params) => {
+ac.on('VIEW_UPDATE_REMOVE', (device_id, params) => {
   // eslint-disable-next-line no-undef
   removeFromView(params._element)
 })
 
 /* Active player updater */
-ac.on('UPDATE_ACTIVE_PLAYER', (deviceId, params) => {
-  const chips = document.querySelectorAll('.chip');
+ac.on('UPDATE_ACTIVE_PLAYER', (device_id, params) => {
+  const chips = document.querySelectorAll('.chip')
 
   for (c in chips) {
-    if(!chips[c].classList) continue;
+    if(!chips[c].classList) { continue }
 
-    chips[c].classList.remove('active');
-
-    if(chips[c].id === `bo_playerTag_${params.playerId}`)
-      chips[c].classList.add('active');
+    chips[c].classList.remove('active')
+    if(chips[c].id === `bo_playerTag_${params.player_id}`){
+      chips[c].classList.add('active')
+    }
   }
 })
 
 /* Drink amount updater */
-ac.on('UPDATE_DRINK_AMT', (deviceId, params) => {
-  const drinks = document.querySelector('#drinks_'+params.playerId);
-  const drinksIcon = document.querySelector('#icon_drinks_'+params.playerId);
+ac.on('UPDATE_DRINK_AMT', (device_id, params) => {
+  const drinks = document.querySelector('#drinks_'+params.player_id)
+  const drinksIcon = document.querySelector('#icon_drinks_'+params.player_id)
 
-  drinks.innerHTML = params.drinks;
-  drinksIcon.classList.add('drink-animation');
+  drinks.innerHTML = params.drinks
+  drinksIcon.classList.add('drink-animation')
 
-  setTimeout(() => {drinksIcon.classList.remove('drink-animation')}, 1000);
+  setTimeout(() => {drinksIcon.classList.remove('drink-animation')}, 1000)
 })
 
 buzzonline.init_ = function () {
-  this.gameState = {
+  this.game_state = {
     rounds: 0,
     phase: 0,
-    subPhase: 0,
-    optionJoker: false,
-    optionDifficultPyramid: false,
+    sub_phase: 0,
+    option_joker: false,
+    option_difficult_pyramid: false,
     players: {}
   }
 }
@@ -113,68 +111,73 @@ buzzonline.init_()
 
 buzzonline.start = function () {
   /* Start the airconsole listener */
-
-  ac.on('FUNCTION', (deviceId, params) => {
-    buzzonline.function[params.function](deviceId, params)
+  ac.on('FUNCTION', (device_id, params) => {
+    buzzonline.function[params.function](device_id, params)
   })
 
-  //Start the connection listener
   this.startDeviceConnectionListener()
-
 }
 
 /* Internal functions */
 buzzonline.startDeviceConnectionListener = function () {
-  ac.onConnect = function (deviceId) {
+  ac.onConnect = function (device_id) {
     /* Store some player data */
-
-    var playerId =          getPlayer(deviceId)
-    const nickname =        ac.getNickname(deviceId)
-    const profilePicture =  ac.getProfilePicture(deviceId)
+    const nickname =        ac.getNickname(device_id)
+    const profile_picture =  ac.getProfilePicture(device_id)
   
-    /* Ensure a player ID is set */
-    if(typeof playerId === "undefined") {
-      ac.setActivePlayers();
-      playerId = getPlayer(deviceId)
-      if(typeof playerId === "undefined") {
-        throw new TypeError('Could not assign a player ID')
-      }
+    ac.setActivePlayers()
+    const player_id = getPlayer(device_id)
+  
+    if(typeof player_id == "undefined" ) {
+      throw new TypeError('Error: Could not generate a player ID.');
+    }
+    
+    if(typeof buzzonline.game_state.players[player_id] !== "undefined") {
+      throw new TypeError(`Error: Player ID ${player_id} is already taken by device ${buzzonline.game_state.players[player_id].device_id} or undefined.`)
     }
 
-    buzzonline.gameState.players[playerId] = {
-      nickname:       nickname,
-      playerId:       playerId,
-      deviceId:       deviceId,
-      profilePicture: profilePicture,
-      drinkAmt:       0,
-      cards:          []
+    buzzonline.game_state.players[player_id] = {
+      nickname:         nickname,
+      player_id:        player_id,
+      device_id:        device_id,
+      profile_picture:  profile_picture,
+      drink_amount:     0,
+      cards:            []
     }
 
     /* Show player data on the screen */
     // eslint-disable-next-line no-undef
     ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
-      _filename:                'component_player_tag',
-      _inject:                  '#bo_playerDrawer',
-      _append:                  true,
-      'player.id':              playerId,
-      'player.name':            nickname,
-      'player.profilePicture':  profilePicture,
-      'player.drinkAmt':        0,
-      'player.active':          ''
+      _filename:                  'component_player_tag',
+      _inject:                    '#bo_playerDrawer',
+      _append:                    true,
+      'player.id':                player_id,
+      'player.name':              nickname,
+      'player.profile_picture':   profile_picture,
+      'player.drink_amount':      0,
+      'player.active':            ''
     })
 
     /* Send the start screen to the player (Either the master screen or the guest screen) */
-    const gameMaster = typeof buzzonline.gameState.gameMasterNickname === 'string' ? buzzonline.gameState.gameMasterNickname : 'The gamemaster'
     let options = {}
+    
+    /* Note: Gamemasters might be updated after a first gamemaster has entered the game.
+        For example, if a Hero joins after the game has launched to the startup screen. 
+        In that case, update the screen and all devices to reflect the new gamemaster 
+        and revoke the original gamemaster's buttons to avoid confusion. */
+    if (device_id === ac.getMasterControllerDeviceId()) {
+      buzzonline.game_state.game_master = player_id
+      buzzonline.game_state.game_master_nickname = nickname
 
-    ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
-      _inject: '#start_gamemaster_name',
-      _content: `${gameMaster}`
-    })
+      ac.broadcastEvent('VIEW_UPDATE_GAMEMASTER', {
+        'gamemaster': `<button class="btn btn-outlined btn-text-smaller">${nickname} will start the game</button>`
+      })
+      
+      ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
+        _inject: '#start_gamemaster_name',
+        _content: nickname
+      })
 
-    if (deviceId === ac.getMasterControllerDeviceId()) {
-      buzzonline.gameState.gameMaster = playerId;
-      buzzonline.gameState.gameMasterNickname = nickname
       options = {
         _filename:              'start',
         'btn.class':            'btn btn-primary',
@@ -184,35 +187,42 @@ buzzonline.startDeviceConnectionListener = function () {
         'btn.text_smaller':     null
       }
     } else {
+      const game_master = buzzonline.game_state.game_master_nickname || 'The gamemaster'
+
       options = {
         _filename:              'start',
         'btn.class':            'btn btn-outlined',
         'btn.disabled':         'disabled="disabled"',
-        'btn.text':             `${gameMaster} will start the game`,
+        'btn.text':             `${game_master} will start the game`,
         'master.hide_elements': 'hidden',
         'btn.text_smaller':     'btn-text-smaller'
       }
     }
-
-    ac.sendEvent(deviceId, 'VIEW_UPDATE', options)
+    ac.sendEvent(device_id, 'VIEW_UPDATE', options)
+    console.log(`${nickname} (${player_id}) has joined at device_id ${device_id}`);
   }
 
-  ac.onDisconnect = function (deviceId) {
+  ac.onDisconnect = function (device_id) {
     /* Get the player ID from the game data */
-    const playerId = getPlayer(deviceId)
+    const player_id = getPlayer(device_id)
 
-    if (typeof playerId === "undefined") {
-      throw new TypeError(`Error: Player ID is undefined. Device id is ${deviceId}. Current state of game is ${JSON.stringify(buzzonline.gameState)}`)
+    if (typeof player_id === "undefined") {
+      throw new TypeError(`Error: Player ID is undefined. Device id is ${device_id}.`)
     }
 
     /* Remove player from the screen */
     // eslint-disable-next-line no-undef
     ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE_REMOVE', {
-      _element: `#bo_playerTag_${playerId}`
+      _element: `#bo_playerTag_${player_id}`
     })
 
     /* Remove player from the game data */
-    delete buzzonline.gameState.players[playerId]
+    delete buzzonline.game_state.players[player_id]
+
+    /* Remove the player from the manifest if they leave in an active game. Cards in their hand become inaccessible. */
+    if(buzzonline.game_state.manifest) {
+      delete buzzonline.game_state.manifest[player_id]
+    }
   }
 }
 
@@ -231,17 +241,16 @@ buzzonline.function = {}
 /**
  * Change option called by the game master
  * 
- * @param deviceId The controller calling the function
+ * @param device_id The controller calling the function
  * @param params Parameters to change
  */
-buzzonline.function.masterChangeOption = function (deviceId, optionData) {
+buzzonline.function.masterChangeOption = function (device_id, optionData) {
   /* Change a game option */
-  if (optionData.optionJoker) {
-    buzzonline.gameState.optionJoker = optionData.optionJoker
+  if (optionData.option_joker) {
+    buzzonline.game_state.option_joker = optionData.option_joker
   }
-
-  if (optionData.optionDifficultPyramid) {
-    buzzonline.gameState.optionDifficultPyramid = optionData.optionDifficultPyramid
+  if (optionData.option_difficult_pyramid) {
+    buzzonline.game_state.option_difficult_pyramid = optionData.option_difficult_pyramid
   }
 }
 
@@ -249,41 +258,38 @@ buzzonline.function.masterChangeOption = function (deviceId, optionData) {
 /**
  * Starts the buzzOnline Game
  * 
- * @param deviceId The controller calling the function
+ * @param device_id The controller calling the function
  * @param params Optional parameters to send with the request
  */
 
-buzzonline.function.startGame = function(deviceId, params) {
+buzzonline.function.startGame = function(device_id, params) {
   
   /* First check if the request was indeed sent by the gamemaster */
-  if(deviceId === ac.getMasterControllerDeviceId()) {
+  if(device_id === ac.getMasterControllerDeviceId()) {
 
     /* Generate a new deck of cards */
-    buzzonline.gameState.cardStack = card_stack.generate(false);
+    buzzonline.game_state.card_stack = cardStack.generate(false)
 
     /*  Generate a manifest of players.
         This manifest is meant to be the reference for all joined players (when a round begins), and will only be updated at the end of a round.
         This is necessary to prevent players joined during a round to break the game (e.g. by having too little cards at the end of Phase 1.)
     */
-    buzzonline.gameState.manifest = [];
-    for(player in buzzonline.gameState.players) {
-      buzzonline.gameState.manifest.push(buzzonline.gameState.players[player]);
+    buzzonline.game_state.manifest = []
+    for(player in buzzonline.game_state.players) {
+      buzzonline.game_state.manifest[player] = buzzonline.game_state.players[player]
+      console.log(`Adding ${buzzonline.game_state.players[player].nickname} (${buzzonline.game_state.players[player].player_id}) to the manifest...`)
     }
     
     /* Initiate a new round */
-    buzzonline.gameState.rounds++;
+    buzzonline.game_state.rounds++
+    buzzonline.game_state.phase = buzzonline.game_state.sub_phase = 1
 
-    buzzonline.gameState.phase = buzzonline.gameState.subPhase = 1;
-
-    /* Call the phase controller to handle the game from here on. */
-    buzzonline.phase.initHandler();
-
-    /* Start the answering handler (Only needs to be called once) */
+    /* Start the game handlers. */
+    buzzonline.phase.initHandler()
     buzzonline.controllerInteraction.initHandler()
     return
-
   } else {
-    console.warn('Device requesting startGame is not the master controller. Aborting...');
+    console.warn('Device requesting startGame is not the master controller. Aborting...')
   }
 }
 
@@ -297,81 +303,72 @@ buzzonline.function.startGame = function(deviceId, params) {
  * 
  * 
  */
-buzzonline.phase = {};
+buzzonline.phase = {}
 
 
 buzzonline.phase.initHandler = function() {
 
-  /* Create a player list from the manifest to track which players have completed the phase (Phase 1 only) */
-  buzzonline.gameState.currentPlayer = 0
-
-  /* Start the phaseHandler */
+  /* Track the current player (for turn-based card dealing) */
+  buzzonline.game_state.current_player = 0
   buzzonline.phase.handler()
 }
 
 buzzonline.phase.handler = function() {
-  /* Send the question for the current phase and subphase to the active controller and screen. */
-  let currentPlayer = buzzonline.gameState.currentPlayer;
-  let manifest = buzzonline.gameState.manifest[currentPlayer];
+  /* Send the question for the current phase and sub_phase to the active controller and screen. */
+  let current_player  = buzzonline.game_state.current_player
+  let manifest       = buzzonline.game_state.manifest[current_player]
   
-  console.log(buzzonline.gameState);
+  console.log(buzzonline.game_state)
   
   /* If all players have played, start a new phase */
-  if(currentPlayer >= buzzonline.gameState.manifest.length) {
+  if(current_player >= buzzonline.game_state.manifest.length) {
     buzzonline.phase.next()
     return
   } else {
-    const currentPlayerDeviceId = manifest.deviceId
-    const currentPlayerNickname = manifest.nickname
-    const componentCurrentPhase = `component_phase_${buzzonline.gameState.phase}_${buzzonline.gameState.subPhase}`
-    const hostCurrentPhase      = `host_phase_${buzzonline.gameState.phase}_${buzzonline.gameState.subPhase}`
+
+    /* Skip if manifest index is empty */
+    if(typeof manifest === "undefined"){
+      buzzonline.phase.answered()
+      return
+    }
     
-    /* Generate the question and answer for this phase/subphase */
-    buzzonline.phase.generateQuestionAnswer(buzzonline.gameState.phase, buzzonline.gameState.subPhase)
+    /* Generate the question and answer for this phase/sub_phase */
+    buzzonline.game_state.current_answer = buzzonline.phase.creator[`phase_${buzzonline.game_state.phase}`](buzzonline.game_state.sub_phase, cardStack.deal())
 
     /* Send out the correct screen to every player */
-    for(manifestPlayer in buzzonline.gameState.manifest) {
-      let manifestCurrent = buzzonline.gameState.manifest[manifestPlayer]
-
-      if(manifestCurrent.deviceId == currentPlayerDeviceId) {
+    for(manifestPlayer in buzzonline.game_state.manifest) {
+      let current_device_id = buzzonline.game_state.manifest[manifestPlayer].device_id
+      if(current_device_id == manifest.device_id) {
         /* Current player, send the game screen */
-        ac.sendEvent(manifestCurrent.deviceId, 'VIEW_UPDATE', {
-          _filename: componentCurrentPhase,
-          'player.name': currentPlayerNickname,
+        ac.sendEvent(current_device_id, 'VIEW_UPDATE', {
+          _filename: `component_phase_${buzzonline.game_state.phase}_${buzzonline.game_state.sub_phase}`,
+          'player.name': manifest.nickname,
           _enlarge_view: true
         })
       } else {
         /* Waiting player, send the wait screen */
-        ac.sendEvent(manifestCurrent.deviceId, 'VIEW_UPDATE', {
+        ac.sendEvent(current_device_id, 'VIEW_UPDATE', {
           _filename: 'client_wait',
           _no_fadeout: true,
-          'game.currentPlayer': currentPlayerNickname
+          'game.current_player': manifest.nickname
         })
       }
     }
 
     /* Send the screen equivalent, and update the screen to reflect the new active player. */
     ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
-      _filename: hostCurrentPhase,
-      'player.name': currentPlayerNickname
+      _filename: `host_phase_${buzzonline.game_state.phase}_${buzzonline.game_state.sub_phase}`,
+      'player.name': manifest.nickname
     })
 
     ac.sendEvent(AirConsole.SCREEN, 'UPDATE_ACTIVE_PLAYER', {
-      'playerId': manifest.playerId
+      'player_id': manifest.player_id
     })
   }
 }
 
-buzzonline.phase.generateQuestionAnswer = function(phase, subPhase) {
-  const phaseC = `phase_${phase}`
-  buzzonline.gameState.currentAnswer = buzzonline.phase.creator[phaseC](subPhase, card_stack.deal())
-}
-
 buzzonline.phase.answered = function() {
-  console.log('Player answered, continuing...')
-
-  /* Set the next current player */
-  buzzonline.gameState.currentPlayer++
+  buzzonline.game_state.current_player++
 
   /* Call the handler to init the next phase. */
   buzzonline.phase.handler()
@@ -380,125 +377,22 @@ buzzonline.phase.answered = function() {
 
 buzzonline.phase.next = function() {
   
-  switch(buzzonline.gameState.phase){
+  switch(buzzonline.game_state.phase){
     case 1:
       /* Up the phase by 1 */
-      if(buzzonline.gameState.subPhase < 4) {
-        buzzonline.gameState.subPhase++
+      if(buzzonline.game_state.sub_phase < 4) {
+        buzzonline.game_state.sub_phase++
       }
-      break;
+      break
     case 2:
-      break;
+      break
     case 3:
-      break;
+      break
   }
 
   /* Init a new phase */
   buzzonline.phase.initHandler()
   return
-}
-
-buzzonline.phase.creator = {}
-
-/**
- *
- * CREATORS - Create a new game phase
- *
- * @param {int} subPhase The current sub phase the game is in.
- * @param {object} card The player's card.
- * 
- * @returns {string} correctAnswer
- */
-buzzonline.phase.creator.phase_1 = function(subPhase, card) {
-
-  let correctAnswer;
-
-  switch(subPhase) {
-    case 1:
-      correctAnswer = card.color
-      break
-    case 2:
-    case 3:
-      correctAnswer = card.value
-      break
-    case 4:
-      correctAnswer = card.suit
-      break
-  }
-
-  return correctAnswer
-}
-
-buzzonline.phase.creator.phase_2 = function() {
-
-}
-
-/**
- *
- * EVALS - Evaluates player answers
- *
- */
-buzzonline.phase.evaluator = {};
-
-buzzonline.phase.evaluator.phase_1_1 = function(playerAnswer, correctAnswer, playerCards = null){
-    /* Phase 1.1: Player must choose Red or Black */
-    return playerAnswer === correctAnswer;
-}
-
-buzzonline.phase.evaluator.phase_1_2 = function(playerAnswer, correctAnswer, playerCards) {
-    /* Phase 1.2: Player must choose if the provided card is higher or lower than their current card */
-    var playerCard = parseInt(playerCards[Object.keys(playerCards)[0]].value);
-    var correctAnswer = parseInt(correctAnswer);
-    return (
-        (playerCard > correctAnswer && playerAnswer == "lower") ||
-        (playerCard < correctAnswer && playerAnswer == "higher")
-    );
-}
-
-buzzonline.phase.evaluator.phase_1_3 = function(playerAnswer, correctAnswer, playerCards) {
-    /* Phase 1.3: Player must choose if the provided card has a value inside or outside the values of their current card */
-    correctAnswer = parseInt(correctAnswer);
-    var currValues = [];
-
-    /* First, get the values of the current two cards in the player's hand */
-    for(var card in playerCards) currValues.push(parseInt(playerCards[card].value));
-
-    /* Next, sort the array from lowest to highest */
-    currValues = currValues.sort(function(a, b){return a - b});
-
-    /* If the value of the provided card is equal to one of the cards in the player's hand, the answer is always wrong */
-    if(currValues.includes(correctAnswer)) return false;
-
-    /* Then, evaluate if the number is between the specified values */
-    if(currValues[0] < correctAnswer && correctAnswer < currValues[1]) {
-        return playerAnswer == 'inside';
-    } else {
-        return playerAnswer == 'outside';
-    }
-}
-
-buzzonline.phase.evaluator.phase_1_4 = function(playerAnswer, correctAnswer, playerCards) {
-    /* Phase 1.4: Player must choose if the suit of the provided card is already in their hand */
-
-    var currSuits = [];
-
-    /* First, extract all the suits of the cards the player has in their hand */
-    for(var card in playerCards) {
-        if(currSuits.indexOf(playerCards[card].suit) == -1) {
-            currSuits.push(playerCards[card].suit);
-        }
-    }
-
-    /* Then, check if the suit of the provided card was in the player's hand already */
-    var in_hand = false;
-    if(currSuits.indexOf(correctAnswer) !== -1){
-        in_hand = true;
-    }
-
-    /* Last, evaluate if the player had the same answer as in_hand */
-    return playerAnswer == in_hand;
-
-    //@TODO: Write a function for evaluating Disco
 }
 
 
@@ -512,68 +406,172 @@ buzzonline.phase.evaluator.phase_1_4 = function(playerAnswer, correctAnswer, pla
  * 
  * 
  */
-buzzonline.controllerInteraction = {};
+buzzonline.controllerInteraction = {}
 
 
 buzzonline.controllerInteraction.initHandler = function(){
   /* Start the listener for controller interaction */
-  ac.on('CLIENT_ANSWER', (deviceId, params) => {
+  ac.on('CLIENT_ANSWER', (device_id, params) => {
 
     /* Check the playerlist if this controller is supposed to answer */
-    const player = buzzonline.gameState.manifest[getPlayer(deviceId)];
+    const player = buzzonline.game_state.manifest[getPlayer(device_id)]
 
-    if(buzzonline.gameState.manifest[buzzonline.gameState.currentPlayer].deviceId !== deviceId) {
-      console.warn(`Wrong player answered; expected answer from device ${buzzonline.gameState.manifest[buzzonline.gameState.currentPlayer].deviceId}, got answer from device ${deviceId}`)
+    if(buzzonline.game_state.manifest[buzzonline.game_state.current_player].device_id !== device_id) {
+      console.warn(`Wrong player answered; expected answer from device ${buzzonline.game_state.manifest[buzzonline.game_state.current_player].device_id}, got answer from device ${device_id}`)
       return false
     }
 
     /* Verify the answer with the phase handler. */
-    const playerAnswer = params.query;
-    const correctAnswer = buzzonline.gameState.currentAnswer;
-    const playerCards = player.cards;
-
-    const phase = `phase_${buzzonline.gameState.phase}_${buzzonline.gameState.subPhase}`
-
-    const result = buzzonline.phase.evaluator[phase](playerAnswer, correctAnswer, playerCards)
-
-    const card = card_stack.deal(true)
+    const phase = `phase_${buzzonline.game_state.phase}_${buzzonline.game_state.sub_phase}`
+    const result = buzzonline.phase.evaluator[phase](params.query, buzzonline.game_state.current_answer, player.cards)
+    const card = cardStack.deal(true)
 
     /* Send the result to the screen and the player. */
     if(result) {
-      resultFile = 'client_right_answer'
+      result_file = 'client_right_answer'
     } else {
-      resultFile = 'client_wrong_answer'
-      buzzonline.gameState.manifest[getPlayer(deviceId)].drinkAmt++
+      result_file = 'client_wrong_answer'
+      buzzonline.game_state.manifest[getPlayer(device_id)].drink_amount++
       ac.sendEvent(AirConsole.SCREEN, 'UPDATE_DRINK_AMT', {
-        playerId: getPlayer(deviceId),
-        drinks: buzzonline.gameState.manifest[getPlayer(deviceId)].drinkAmt
+        player_id: getPlayer(device_id),
+        drinks: buzzonline.game_state.manifest[getPlayer(device_id)].drink_amount
       })
     }
 
-    ac.sendEvent(deviceId, 'VIEW_UPDATE_ADDCARD', {
-      _filename: resultFile,
+    ac.sendEvent(device_id, 'VIEW_UPDATE_ADDCARD', {
+      _filename: result_file,
       _restore_view: true,
       'card.img_src': card.html
     })
 
-
     ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
-      _filename: resultFile,
+      _filename: result_file,
       'card.img_src': card.html
     })
 
     /* Move the card to the players' hand (if in Phase 1) */
-    buzzonline.gameState.manifest[getPlayer(deviceId)].cards.push(card)
+    if(buzzonline.game_state.phase == 1) {
+      buzzonline.game_state.manifest[getPlayer(device_id)].cards.push(card)
+    }
 
-    /* Call the continuation handler to start the next player or phase. */
+    /* Call the continuation handler to start the next player or phase, with a 2 second delay so the current player can see their result. */
     setTimeout(() => {
       buzzonline.phase.answered()
     }, 2000)
 
     return true
   })
+
+  ac.on('CLIENT_CARD', (device_id, params) => {
+    
+  })
 }
 
+buzzonline.phase.creator = {}
+
+/**
+ *
+ * CREATORS - Create a new game phase
+ *
+ * @param {int} sub_phase The current sub phase the game is in.
+ * @param {object} card The player's card.
+ * 
+ * @returns {string} correct_answer
+ */
+buzzonline.phase.creator.phase_1 = function(sub_phase, card) {
+
+  let correct_answer
+
+  switch(sub_phase) {
+    case 1:
+      correct_answer = card.color
+      break
+    case 2:
+    case 3:
+      correct_answer = card.value
+      break
+    case 4:
+      correct_answer = card.suit
+      break
+  }
+  return correct_answer
+}
+
+buzzonline.phase.creator.phase_2 = function() {
+
+}
+
+/**
+ *
+ * EVALS - Evaluates player answers
+ *
+ */
+buzzonline.phase.evaluator = {}
+
+buzzonline.phase.evaluator.phase_1_1 = function(player_answer, correct_answer, player_cards = null){
+    /* Phase 1.1: Player must choose Red or Black */
+    return player_answer === correct_answer
+}
+
+buzzonline.phase.evaluator.phase_1_2 = function(player_answer, correct_answer, player_cards) {
+    /* Phase 1.2: Player must choose if the provided card is higher or lower than their current card */
+    var player_card = parseInt(player_cards[Object.keys(player_cards)[0]].value)
+    var correct_answer = parseInt(correct_answer)
+    return (
+        (player_card > correct_answer && player_answer == "lower") ||
+        (player_card < correct_answer && player_answer == "higher")
+    )
+}
+
+buzzonline.phase.evaluator.phase_1_3 = function(player_answer, correct_answer, player_cards) {
+    /* Phase 1.3: Player must choose if the provided card has a value inside or outside the values of their current card */
+    correct_answer = parseInt(correct_answer)
+    let current_values = []
+
+    /* First, get the values of the current two cards in the player's hand */
+    for(let card in player_cards) {current_values.push(parseInt(player_cards[card].value))}
+
+    /* Next, sort the array from lowest to highest */
+    current_values = current_values.sort(function(a, b){return a - b})
+
+    /* If the value of the provided card is equal to one of the cards in the player's hand, the answer is always wrong */
+    if(current_values.includes(correct_answer)) return false
+
+    /* Then, evaluate if the number is between the specified values */
+    if(current_values[0] < correct_answer && correct_answer < current_values[1]) {
+        return player_answer == 'inside'
+    } else {
+        return player_answer == 'outside'
+    }
+}
+
+buzzonline.phase.evaluator.phase_1_4 = function(player_answer, correct_answer, player_cards) {
+    /* Phase 1.4: Player must choose if the suit of the provided card is already in their hand */
+
+    var current_suits = []
+
+    /* First, extract all the suits of the cards the player has in their hand */
+    for(var card in player_cards) {
+        if(current_suits.indexOf(player_cards[card].suit) == -1) {
+            current_suits.push(player_cards[card].suit)
+        }
+    }
+
+    /* Then, check if the suit of the provided card was in the player's hand already */
+    var in_hand = false
+    if(current_suits.indexOf(correct_answer) !== -1){
+        in_hand = true
+    }
+
+    /* Last, evaluate if the player had the same answer as in_hand */
+    return player_answer == in_hand
+
+    //@TODO: Write a function for evaluating Disco
+}
+
+buzzonline.phase.evaluator.phase_2 = function() {
+
+}
 
 /**
  * 
@@ -581,13 +579,13 @@ buzzonline.controllerInteraction.initHandler = function(){
  * CARD STACK
  * 
  * Handler for the card stack. 
- * Generates and shuffles cards; handles dealing and dispatching cards, and contains all relevant representations.
+ * Generates and shuffles cards, handles dealing and dispatching cards, and contains all relevant representations.
  * 
  * 
  */
 
 
-var card_stack = {};
+var cardStack = {}
 
 
 /**
@@ -595,8 +593,8 @@ var card_stack = {};
  * 
  * @param {boolean} jokers Add Jokers to the deck (Non-implemented function, todo)
  */
-card_stack.generate = function(jokers) {
-  var stack = [];
+cardStack.generate = function(jokers) {
+  var stack = []
 
   /* Build the main card stack */
   for(var suit in card_stack.suits) {
@@ -612,7 +610,7 @@ card_stack.generate = function(jokers) {
   }
 
   /* Shuffle and convert the deck */
-  stack = card_stack.convert(stack)
+  stack = cardStack.convert(stack)
   return stack
 }
 
@@ -623,11 +621,11 @@ card_stack.generate = function(jokers) {
  * 
  * @returns Object stack_object
  */
-card_stack.convert = function(stack) {
+cardStack.convert = function(stack) {
     var stack_object = {}
 
     /* Shuffle the cards */
-    stack = card_stack.shuffle(stack)
+    stack = cardStack.shuffle(stack)
 
     /* Convert to an object with properties suit, color and value */
     for(card in stack) {
@@ -646,7 +644,7 @@ card_stack.convert = function(stack) {
             suit: card_name[0],
             value: card_name[1],
             html: `buzzonline__playingcard_${card_stack.imgRepresentation[card_name[0]]}${card_name[1]}.png`,
-            rank: card_stack.calculateRank(card_name[0], card_name[1])
+            rank: cardStack.calculateRank(card_name[0], card_name[1])
         }
     }
 
@@ -665,16 +663,17 @@ card_stack.convert = function(stack) {
 
     @returns {int} rank
 */
-card_stack.calculateRank = function(suit, value) {
-  sRank = {
+cardStack.calculateRank = function(suit, value) {
+  suits_rank = {
     'clubs': 1,
     'diamonds': 2,
     'spades': 3,
     'hearts': 4
   }
 
-  return (4 * (value - 2)) + sRank[suit]
+  return (4 * (value - 2)) + suits_rank[suit]
 }
+
 
 /**
  * Shuffles the cards.
@@ -683,7 +682,7 @@ card_stack.calculateRank = function(suit, value) {
  * 
  * @returns Object stack
  */
-card_stack.shuffle = function(stack){
+cardStack.shuffle = function(stack){
     let m = stack.length, i
 
     while(m) {
@@ -697,22 +696,24 @@ card_stack.shuffle = function(stack){
 /**
  * Deal a card.
  * 
- * @param {boolean} deleteCard Removes the card from the deck (needed when transferring to a players' hand.) Default 'false'
+ * @param {boolean} delete_card Removes the card from the deck (needed when transferring to a players' hand.) Default 'false'
  * 
  * @returns {Object} card
  */
-card_stack.deal = function(deleteCard = false) {
+cardStack.deal = function(delete_card = false) {
   
   /* Deal the card to the calling function */
-  var card = buzzonline.gameState.cardStack[Object.keys(buzzonline.gameState.cardStack)[0]]
-  card.name = Object.keys(buzzonline.gameState.cardStack)[0]
+  var card = buzzonline.game_state.card_stack[Object.keys(buzzonline.game_state.card_stack)[0]]
+  card.name = Object.keys(buzzonline.game_state.card_stack)[0]
 
   /* Optional: delete the card from the stack */
-  if(deleteCard) delete buzzonline.gameState.cardStack[Object.keys(buzzonline.gameState.cardStack)[0]]
+  if(delete_card) delete buzzonline.game_state.card_stack[Object.keys(buzzonline.game_state.card_stack)[0]]
 
   /* Pass back the card */
   return card
 }
+
+var card_stack = {}
 
 card_stack.suits = [
     'hearts',
@@ -760,8 +761,8 @@ card_stack.imgRepresentation = {
 
  /**
   * Converts a device ID to a player ID.
-  * @param {int} deviceId 
+  * @param {int} device_id 
   */
- function getPlayer(deviceId) {
-    return ac.convertDeviceIdToPlayerNumber(deviceId)
+ function getPlayer(device_id) {
+    return ac.convertDeviceIdToPlayerNumber(device_id)
  }

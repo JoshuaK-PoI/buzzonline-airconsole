@@ -25,10 +25,12 @@ ac.on('VIEW_UPDATE_REMOVE', function (deviceId, params, context) {
     removeFromView(params._element);
 })
 
-
-/**
- * Game functions - CONTROLLER ONLY
- */
+ac.on('VIEW_UPDATE_GAMEMASTER', function(deviceId, params, context){
+    if(ac.getMasterControllerDeviceId() !== ac.getDeviceId()) {
+        /* I am not the master controller */
+        document.querySelector('.button-container').innerHTML = params.gamemaster
+    }
+})
 
 
 
