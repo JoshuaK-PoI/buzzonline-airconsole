@@ -94,3 +94,14 @@ $container-height-smaller:      calc(100% - #{$player-drawer-compensation} - #{$
 // ------------------------------------
 $button-height: 64px;
 $button-margin-bottom: 8px;
+
+
+// ------------------------------------
+// MIXINS
+// ------------------------------------
+
+@mixin flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

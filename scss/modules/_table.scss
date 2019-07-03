@@ -7,9 +7,11 @@
         height: 100%;
         
         div {
-            
-            background: url('/dist/img/cards/buzzonline__playingcard_back.png')  center center no-repeat;
-            background-size: 100%;
+            @include flex-center;
+            img {
+                max-height: 17vh;
+                transform: rotate(-90deg);
+            }
         }
     }
 }
