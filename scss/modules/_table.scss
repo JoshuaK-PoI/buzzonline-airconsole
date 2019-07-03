@@ -1,0 +1,15 @@
+.card-table {
+    height: 100%;
+    display: flex;
+    .card-table-row {
+        display: inline-grid;
+        width: 20%;
+        height: 100%;
+        
+        div {
+            
+            background: url('/dist/img/cards/buzzonline__playingcard_back.png')  center center no-repeat;
+            background-size: 100%;
+        }
+    }
+}

@@ -78,7 +78,8 @@ $player-image-width:            $player-drawer-height - (2 * $player-drawer-chip
 
 //Site container
 
-$container-padding:             32px;
+$container-padding:             36px;
+$container-padding-side:        32px;
 $border-radius-standard:        12px;
 
 $container-padding-compensation: 2 * $container-padding;

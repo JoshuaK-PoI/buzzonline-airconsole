@@ -64,7 +64,7 @@ function addcard(file, params = {}) {
   /* Send data to the view */
   view(file, params)
   /* Update the card drawer */
-  document.querySelector('.bo-client-cards').insertAdjacentHTML('beforeend', `<div class="card"><img src="/dist/img/cards/${params["card.img_src"]}" alt="card"></div>`)
+  document.querySelector('.bo-client-cards').insertAdjacentHTML('beforeend', `<div class="card" id="card_${params["card.rank"]}" data-card-rank="${params["card.rank"]}" data-card-properties="${params["card.properties"]}"><img src="/dist/img/cards/${params["card.img_src"]}" alt="card"></div>`)
 }
 
 function enlargeView() {

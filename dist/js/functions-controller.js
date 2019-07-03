@@ -13,23 +13,56 @@ ac.onMessage = function(device_id, data) {
     this.dispatchEvent(device_id, data);
 };
 
-ac.on('VIEW_UPDATE', function (deviceId, params, context) {
+ac.on('CONTROLLER_VIBRATE', function(device_id, params, context){
+    ac.vibrate(params.time);
+})
+
+ac.on('VIEW_UPDATE', function (device_id, params, context) {
     view(params._filename, params);
 })
 
-ac.on('VIEW_UPDATE_ADDCARD', function (deviceId, params, context) {
+ac.on('VIEW_UPDATE_ADDCARD', function (device_id, params, context) {
     addcard(params._filename, params);
 })
     
-ac.on('VIEW_UPDATE_REMOVE', function (deviceId, params, context) {
+ac.on('VIEW_UPDATE_REMOVE', function (device_id, params, context) {
     removeFromView(params._element);
 })
 
-ac.on('VIEW_UPDATE_GAMEMASTER', function(deviceId, params, context){
+ac.on('VIEW_UPDATE_GAMEMASTER', function(device_id, params, context){
     if(ac.getMasterControllerDeviceId() !== ac.getDeviceId()) {
         /* I am not the master controller */
-        document.querySelector('.button-container').innerHTML = params.gamemaster
+        const container = document.querySelector('.button-container')
+        if(container)
+            container.innerHTML = params.gamemaster
     }
+})
+
+ac.on('CLIENT_SORT_CARDS', function(device_id, params, context){
+    const cards = document.querySelectorAll('.bo-client-cards .card');
+
+    /* First, clean out the view */
+    document.querySelector('.bo-client-container').innerHTML = '';
+
+    let output_cards = [];
+
+    for(i = 0; i < cards.length; i++) {
+        /* Get the card rank of the current card */
+        let card_rank = cards[i].dataset.cardRank;
+
+        /* Add an onClick function to send the card to the server */
+        cards[i].onclick = function() { sendCard(this); }
+        /* Set this as the index for the output card stack */
+        output_cards[card_rank] = cards[i];
+    }
+
+    /* Add the cards to the view */
+    for(o in output_cards) {
+        if(output_cards[o])
+            document.querySelector('.bo-client-container').insertAdjacentElement('beforeend', output_cards[o]);    
+    }
+    
+
 })
 
 
@@ -55,4 +88,16 @@ function sendAnswer(e, query) {
     ac.sendEvent(AirConsole.SCREEN, 'CLIENT_ANSWER', {
         query: query
     })
-}   
+}
+
+/**
+ * Send a card to the host
+ */
+function sendCard(e) {
+
+    const card_to_send = e.dataset.cardProperties;
+
+    ac.sendEvent(AirConsole.SCREEN, 'CLIENT_CARD', {
+        card: card_to_send
+    });
+}
