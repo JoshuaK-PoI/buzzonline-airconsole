@@ -23,6 +23,8 @@ $color-yellow:      rgb(255, 200, 46);
 $color-red:         rgb(190, 37, 0);
 $color-green:       rgb(72, 123, 0);
 
+//Transparent
+$transparent:       rgba(0, 0, 0, 0);
 
 // -----------------
 // Color Definitions
@@ -40,7 +42,7 @@ $color-text-secondary:  $color-light-blue;
 $color-text-emphasis:   $color-yellow;
 $color-text-red:        $color-red;
 $color-text-green:      $color-green;
-
+$color-text-inverted:   $color-primary;
 
 // -----
 // Fonts
@@ -48,8 +50,8 @@ $color-text-green:      $color-green;
 
 $font-light:    300;
 $font-regular:  400;
-$font-semibold: 600;
-$font-bold:     700;
+$font-semibold: 500;
+$font-bold:     600;
 
 @mixin font-standard() {
     font-family:    'Hind Guntur', sans-serif;
@@ -92,8 +94,13 @@ $container-height-smaller:      calc(100% - #{$player-drawer-compensation} - #{$
 // ------------------------------------
 //         # SITE COMPONENTS
 // ------------------------------------
-$button-height: 64px;
-$button-margin-bottom: 8px;
+
+
+// Buttons
+$button-height: 96px;
+$button-height-desktop: 64px;
+$button-margin-bottom: 16px;
+$button-margin-bottom-desktop: 8px;
 
 
 // ------------------------------------

@@ -8,7 +8,7 @@
 
 $screen-small:    330px;
 $screen-medium:   370px;
-$screen-large:    420px;
+$screen-large:    768px;
 
 
 
@@ -17,8 +17,12 @@ $screen-large:    420px;
 // ----------------
 
 @mixin screen-size($size) {
+
+
     @if $size == xsmall {
         @media (max-width: $screen-small) {@content;}
+    } @else if $size == mobile {
+        @media (max-width: $screen-large) {@content;}
     } @else if $size == small {
         @media (min-width: $screen-small) and (max-width: $screen-medium) { @content; }
     } @else if $size == medium {

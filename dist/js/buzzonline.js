@@ -38,12 +38,11 @@ ac.onReady = function () {
  */
  
 if(window.self === window.top) {
-  /* Spawn 9 nametags (Max for this game) */
-  for(i = 0; i < 9; i++) {
-    view('host_pyramid_setup', {
-      
-    }) 
-  }
+    view('notice', {
+      _inject: '#notice_container',
+      message_id: "msg_1",
+      message: 'This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.'
+    })
 }
 /**
  * 
@@ -93,6 +92,12 @@ ac.on('UPDATE_DRINK_AMT', (device_id, params) => {
   drinksIcon.classList.add('drink-animation')
 
   setTimeout(() => {drinksIcon.classList.remove('drink-animation')}, 1000)
+})
+
+ac.on('NOTICE', function(device_id, params) {
+  view('notice', {
+    message: message
+  })
 })
 
 buzzonline.init_ = function () {
@@ -430,7 +435,30 @@ buzzonline.phase.phase_2.handler = function() {
     _filename: 'host_pyramid_setup'
   })
 
+  /* Keep track of the current card we're on */
+  buzzonline.game_state.current_card = 0
+
+  /* Start the dealing phase */
+  buzzonline.phase.phase_2.deal();
+
 }
+
+buzzonline.phase.phase_2.deal = function() {
+
+  if(buzzonline.game_state.current_card < 15) {
+    /* Start by adding the card to the view */
+    const card = cardStack.deal(true)
+    const current_card = buzzonline.gameState.current_card++
+
+    view('pyr_card', {
+      _inject: `#pyr_card_${current_card}`,
+      'card.src': card.html,
+      'card.value': card.value,
+      'card.fnr': current_card
+    })
+  }
+}
+
 
 buzzonline.phase.answered = function() {
   buzzonline.game_state.current_player++
@@ -499,11 +527,7 @@ buzzonline.controllerInteraction.initHandler = function(){
       result_file = 'client_right_answer'
     } else {
       result_file = 'client_wrong_answer'
-      buzzonline.game_state.manifest[getPlayer(device_id)].drink_amount++
-      ac.sendEvent(AirConsole.SCREEN, 'UPDATE_DRINK_AMT', {
-        player_id: device_id,
-        drinks: buzzonline.game_state.manifest[getPlayer(device_id)].drink_amount
-      })
+      buzzonline.drink(getPlayer(device_id))
     }
 
     ac.sendEvent(device_id, 'VIEW_UPDATE_ADDCARD', {
@@ -534,7 +558,48 @@ buzzonline.controllerInteraction.initHandler = function(){
 
   ac.on('CLIENT_CARD', (device_id, params) => {
     console.log('Received client card with data ', params)
+
+    /* Cards can only be handled in Game Phase 2 */
+    if(buzzonline.game_state.phase !== 2) { return }
+
+    const player = buzzonline.game_state.manifest[getPlayer(device_id)]
+
+    // Check if the current card is of equal value to the sent card */
+    const current_card = document.querySelector(`#pyr_card_fnr_${buzzonline.game_state.current_card}`);
+    const player_card = params.card.split('_');
+
+    // If the card is not equal; the player is wrong and has to drink 1.
+    if(current_card.dataset.cardValue != player_card[1]) {  
+      buzzonline.drink(getPlayer(device_id))
+      buzzonline.notice({
+        device_id: device_id,
+        message_screen: `${player.nickname} has chosen the wrong card and has to drink 1!`,
+        message_player: `Wrong card chosen! Drink 1.` 
+      })
+    }
+
   })
+}
+
+buzzonline.drink = function(player_id) {
+  buzzonline.game_state.manifest[player_id].drink_amount++;
+  ac.sendEvent(AirConsole.SCREEN, 'UPDATE_DRINK_AMT', {
+    player_id: device_id,
+    drinks: buzzonline.game_state.manifest[player_id].drink_amount
+  })
+}
+
+buzzonline.notice = function(args) {
+  ac.sendEvent(AirConsole.SCREEN, 'NOTICE', {
+    message: args.message_screen
+  })
+
+  if(args.device_id) {
+    ac.sendEvent(args.device_id, 'NOTICE', {
+      message: args.message_player || args.message_screen
+    })
+  }
+  
 }
 
 buzzonline.phase.creator = {}
@@ -565,10 +630,6 @@ buzzonline.phase.creator.phase_1 = function(sub_phase, card) {
       break
   }
   return correct_answer
-}
-
-buzzonline.phase.creator.phase_2 = function() {
-
 }
 
 /**

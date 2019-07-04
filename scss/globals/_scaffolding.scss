@@ -23,9 +23,17 @@ html,
 body {
     @include reset;
 }
-
+html {
+    background-image: linear-gradient($color-primary 10%, 80%, $color-secondary 90%);
+}
 body {
-    background-color: $color-primary;
+    background-image: url("/dist/img/buzzonline-logo-dblue-alt.png");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    @include screen-size(large) {
+        background-size: 50%;
+    }
 }
 
 
