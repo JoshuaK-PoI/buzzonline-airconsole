@@ -11,7 +11,6 @@
  * See https://github.com/JoshuaK-PoI/buzz-online-airconsole
  */
 
-
 /* Init Airconsole and BuzzOnline objects */
 const buzzonline = {}
 
@@ -38,11 +37,7 @@ ac.onReady = function () {
  */
  
 if(window.self === window.top) {
-    view('notice', {
-      _inject: '#notice_container',
-      message_id: "msg_1",
-      message: 'This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.This is a message to test the notice panel! I am going to pad out this message far enough to where it will wrap around to the next line to see what will happen.'
-    })
+    
 }
 /**
  * 
@@ -96,7 +91,7 @@ ac.on('UPDATE_DRINK_AMT', (device_id, params) => {
 
 ac.on('NOTICE', function(device_id, params) {
   view('notice', {
-    message: message
+    message: params.message
   })
 })
 
@@ -179,7 +174,6 @@ buzzonline.deviceConnectionHandler = function(device_id) {
     }
   }
   ac.sendEvent(device_id, 'VIEW_UPDATE', options)
-  console.log(`${nickname} has joined at device_id ${device_id}`);
 }
 
 buzzonline.deviceDisconnectionHandler = function(device_id) {
@@ -188,14 +182,10 @@ buzzonline.deviceDisconnectionHandler = function(device_id) {
 
   if (typeof player_id !== "undefined") {  
     /* Remove player from the game data */
-    if(buzzonline.game_state.players) {
-      delete buzzonline.game_state.players[player_id]
-    }
+    delete buzzonline.game_state.players[player_id]
 
     /* Remove the player from the manifest if they leave in an active game. Cards in their hand become inaccessible. */
-    if(buzzonline.game_state.manifest) {
-      delete buzzonline.game_state.manifest[player_id]
-    }
+    delete buzzonline.game_state.manifest[player_id]
   } else {
     /* Do we need to elect a new gamemaster? (The game has not started yet) */
     if(device_id = buzzonline.game_state.game_master_device_id) {
@@ -208,7 +198,6 @@ buzzonline.deviceDisconnectionHandler = function(device_id) {
   ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE_REMOVE', {
     _element: `#bo_playerTag_${device_id}`
   })
-
 }
 
 /**
@@ -229,13 +218,13 @@ buzzonline.function = {}
  * @param device_id The controller calling the function
  * @param params Parameters to change
  */
-buzzonline.function.masterChangeOption = function (device_id, optionData) {
+buzzonline.function.masterChangeOption = function (device_id, option_data) {
   /* Change a game option */
-  if (optionData.option_joker) {
-    buzzonline.game_state.option_joker = optionData.option_joker
+  if (option_data.option_joker) {
+    buzzonline.game_state.option_joker = option_data.option_joker
   }
-  if (optionData.option_difficult_pyramid) {
-    buzzonline.game_state.option_difficult_pyramid = optionData.option_difficult_pyramid
+  if (option_data.option_difficult_pyramid) {
+    buzzonline.game_state.option_difficult_pyramid = option_data.option_difficult_pyramid
   }
 }
 
@@ -262,11 +251,7 @@ buzzonline.function.startGame = function(device_id, params) {
         This manifest is meant to be the reference for all joined players (when a round begins), and will only be updated at the end of a round.
         This is necessary to prevent players joined during a round to break the game (e.g. by having too little cards at the end of Phase 1.)
     */
-    buzzonline.game_state.manifest = []
-    for(player in buzzonline.game_state.players) {
-      buzzonline.game_state.manifest[player] = buzzonline.game_state.players[player]
-      console.log(`Adding ${buzzonline.game_state.players[player].nickname} (${buzzonline.game_state.players[player].player_id}) to the manifest...`)
-    }
+    buzzonline.game_state.manifest = [...buzzonline.game_state.players]
     
     /* Initiate a new round */
     buzzonline.game_state.rounds++
