@@ -38,6 +38,28 @@ ac.on('VIEW_UPDATE_GAMEMASTER', function(device_id, params, context){
     }
 })
 
+ac.on('VIEW_UPDATE_PLAYERLIST', function(device_id, params) {
+    
+})
+
+ac.on('NOTICE', function(device_id, params) {
+    view('notice', {
+        _inject: '#notice_container',
+        _append: true,
+        message: params.message,
+        message_id: params.notice_id
+    })
+
+    if(!params.no_auto_dismiss) {
+        setTimeout(() => {
+            document.querySelector(`#not_${params.notice_id}`).classList.add('fadeout')
+            setTimeout(() => {
+            document.querySelector(`#not_${params.notice_id}`).remove()
+            }, 500, true)
+        }, 5000, true)
+    }
+})
+  
 ac.on('CLIENT_SORT_CARDS', function(device_id, params, context){
     const cards = document.querySelectorAll('.bo-client-cards .card');
 
@@ -61,11 +83,7 @@ ac.on('CLIENT_SORT_CARDS', function(device_id, params, context){
         if(output_cards[o])
             document.querySelector('.bo-client-container').insertAdjacentElement('beforeend', output_cards[o]);    
     }
-    
-
 })
-
-
 
 /**
  * Send an answer to the host
@@ -100,4 +118,16 @@ function sendCard(e) {
     ac.sendEvent(AirConsole.SCREEN, 'CLIENT_CARD', {
         card: card_to_send
     });
+}
+
+/**
+ * Dismiss a notification
+ * 
+ * @param {Number} message_id The ID of the notification panel (excluding the `not_`. Eg.: at message panel `#not_345` this variable should be `345`)
+ */
+function dismiss_notification(message_id) {
+    document.querySelector(`#not_${message_id}`).classList.add('fadeout')
+    setTimeout(() => {
+        document.querySelector(`#not_${message_id}`).remove()
+    }, 500, true)
 }

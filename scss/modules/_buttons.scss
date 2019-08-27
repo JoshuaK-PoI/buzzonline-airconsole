@@ -21,7 +21,7 @@
     width: 100%;
     max-width: 350px;
     height: $button-height-desktop;
-    line-height: 4.5rem;
+    line-height: 64px;
     vertical-align: middle;
     margin: 4px auto $button-margin-bottom-desktop auto;
     transition: 0.1s;
@@ -60,7 +60,7 @@
         vertical-align: middle;
     }
 
-    &:not(.btn-small) {
+    &:not(.btn-small):not(.btn-xsmall) {
         @include screen-size(mobile) {
             @include btn-mobile;
         }
@@ -75,7 +75,7 @@
 .btn-outlined {
     @include btn-specs($transparent, $color-accent);
     border: 1px solid $color-secondary;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.5);
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -84,3 +84,14 @@
     line-height: 4rem;
 }
 
+.btn-xsmall {
+    height: 48px;
+    line-height: 48px;
+    width: unset;
+    min-width: 48px;
+}
+
+.notice-panel .btn {
+    margin: 0;
+    margin-left: 10px;
+}

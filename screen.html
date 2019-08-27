@@ -11,30 +11,47 @@
   <link rel="stylesheet" href="/dist/css/style.css">
 </head>
 <body>
-  <div id="notice_container"></div>
-    <div class="container" id="bo_viewport">
-        <div class="row">
-          <div class="col">
-            <div class="jumbotron bostart-jumbotron">
-              <img class="bologo-img" src="dist/img/buzzonline-logo.png" />
-              <h2 class="lead text-center text-light"><strong>Get your drink ready and prepare for fast action!</strong></h2>
-              <div class="options-panel">
-                <h4 class="options-text text-secondary-light">Options:</h4>
-                <div class="options-content">
-                    <button class="btn btn-outlined btn-text-smaller">Jokers (Coming Soon)</button>
-                    <button class="btn btn-outlined btn-text-smaller">Alternative Pyramid (Coming Soon)</button>
-                </div>
-              </div>
-              <h4 class="text-center text-secondary-light margin-top-large">Waiting for <strong id="start_gamemaster_name">The Gamemaster</strong> to start the game...</h4>
+  
+  <!-- Notice container -->
+  <div id="notice_container" class="notice-container"></div>
+  <!-- /Notice container -->
+  
+  <!-- Screen timer component -->
+  <div class="screen-timer" id="_screen_timer">
+      <svg class="progress-ring" width="120" height="120">
+        <circle class="progress-ring__circle" stroke="white" stroke-width="4" fill="transparent" r="52" cx="60" cy="60"/>
+      </svg>
+      <div class="screen-timer__text"></div>
+  </div>
+  <!-- /Screen timer component -->
+  
+  <!-- Game viewport (NO PLACING CONTENT here; gets reset at start of game) -->
+  <div class="container" id="bo_viewport">
+    <div class="row">
+      <div class="col">
+        <div class="jumbotron bostart-jumbotron">
+          <img class="bologo-img" src="dist/img/buzzonline-logo.png" />
+          <h2 class="lead text-center text-light"><strong>Get your drink ready and prepare for fast action!</strong></h2>
+          <div class="options-panel">
+            <h4 class="options-text text-secondary-light">Options:</h4>
+            <div class="options-content">
+                <button class="btn btn-outlined btn-text-smaller">Jokers (Coming Soon)</button>
+                <button class="btn btn-outlined btn-text-smaller">Alternative Pyramid (Coming Soon)</button>
             </div>
           </div>
+          <h4 class="text-center text-secondary-light margin-top-large">Waiting for <strong id="start_gamemaster_name">The Gamemaster</strong> to start the game...</h4>
         </div>
+      </div>
     </div>
-    <div class="bo-player-drawer" id="bo_playerDrawer">
-    </div>
-    <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
-    <script type="text/javascript" src="dist/js/airconsole-events.js"></script>
-    <script type="text/javascript" src="dist/js/functions.js"></script>
-    <script type="text/javascript" src="dist/js/buzzonline.js"></script>
+  </div>
+  <!-- /Game viewport -->
+  <!-- Player drawer -->
+  <div class="bo-player-drawer" id="bo_playerDrawer">
+  </div>
+  <!-- /Player drawer -->
+  <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
+  <script type="text/javascript" src="dist/js/airconsole-events.js"></script>
+  <script type="text/javascript" src="dist/js/functions.js"></script>
+  <script type="text/javascript" src="dist/js/buzzonline.js"></script>
 </body>
 </html>

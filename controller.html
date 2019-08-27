@@ -14,24 +14,30 @@
   <title>BuzzOnline - CONTROLLER</title>
 
   <link href="https://fonts.googleapis.com/css?family=Hind+Guntur:300,400,500,600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/dist/css/style.css?v=1">
+  <link rel="stylesheet" href="/dist/css/style.css?v=2">
   <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800&display=swap" rel="stylesheet"> 
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
 </head>
 <body>
 
+  <!-- Notice container -->
+  <div id="notice_container" class="notice-container"></div>
+  <!-- /Notice container -->
   <div class="container bo-client-container" id="bo_viewport">
 
   </div>
   <div class="bo-client-cards">
     
   </div>
+  <div class="bo-playerlist" id="bo_playerlist">
+
+  </div>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
-  <script type="text/javascript" src="dist/js/airconsole-events.js"></script>
-  <script type="text/javascript" src="dist/js/functions.js"></script>
-  <script type="text/javascript" src="dist/js/functions-controller.js"></script>
+  <script type="text/javascript" src="dist/js/airconsole-events.js?v=2"></script>
+  <script type="text/javascript" src="dist/js/functions.js?v=2"></script>
+  <script type="text/javascript" src="dist/js/functions-controller.js?v=2"></script>
   <script type="text/javascript">
 
       /**
@@ -45,7 +51,22 @@
         addcard('component_phase_1_1', {
           'card.img_src': 'buzzonline__playingcard_C11.png'
         });
-
+        
+        document.querySelector('#bo_playerlist').innerHTML = `
+        <span> Give&nbsp;<img src="dist/img/beer_mono_white.png">&nbsp;<strong>4</strong>&nbsp;to</span>
+        <button type="button" class="btn btn-primary">Guest 1</button>
+        <button type="button" class="btn btn-primary">Guest 3</button>
+        <button type="button" class="btn btn-primary btn-small">Guest 4 with long name</button>
+        <button type="button" class="btn btn-primary">Guest 5</button>
+        <button type="button" class="btn btn-primary">Guest 6</button>
+        <button type="button" class="btn btn-primary">Guest 7</button>
+        <button type="button" class="btn btn-primary">Guest 8</button>
+        <button type="button" class="btn btn-primary">Guest 9</button>`;
+        
+        setTimeout(() => {
+          document.querySelector('#bo_playerlist').classList.remove('hide');
+          document.querySelector('#bo_playerlist').classList.add('show');
+        }, 100)
       }
   </script>
 </body>

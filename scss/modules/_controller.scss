@@ -1,0 +1,38 @@
+.bo-playerlist {
+    position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    top: 100%;
+    height: calc(80% - 10px);
+    width: 100%;
+    background-color: $color-primary;
+    padding-top: 10px;
+    overflow: scroll;
+    &.show {
+        animation: slideup 0.5s ease-out forwards;
+    }
+    .btn {
+        margin: 5px 10px !important;
+    }
+    span {
+        width: 100%;
+        font-size: 1.5rem;
+        display: flex;
+        justify-content: center;
+        img {
+            max-width: 16px;
+            max-height: 16px;
+        }
+    }
+}
+
+@keyframes slideup {
+    0% {
+        top: 100%;
+    }
+
+    100% {
+        top: 20%;
+    }
+}
