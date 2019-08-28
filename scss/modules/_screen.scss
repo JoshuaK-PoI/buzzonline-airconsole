@@ -1,0 +1,46 @@
+.bo-distri-base {
+    position: absolute;
+    background-color: $color-primary;
+    bottom: 8%;
+    left: 2%;
+    border-radius: $border-radius-standard;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    will-change: opacity;
+    transition-duration: 300ms;
+    opacity: 0;
+    z-index: 2;
+    &.show {
+        opacity: 0.93;
+    }
+    .bo-distri-tag {
+        display: flex;
+        height: 64px;
+        font-size: 1.5rem;
+        &:not(:last-child) {
+            margin-bottom: 5px;
+        }
+        justify-content: flex-end;
+        align-items: center;
+        background-color: $color-primary-faded;
+        box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.4) inset;
+        border-radius: $border-radius-standard;
+        img {
+            max-width: 16px;
+            max-height: 16px;
+        }
+        .bo-distri-tag--component {
+            font-family: 'Nunito', sans-serif;
+            padding: 8px;
+            &:nth-child(3) {
+                font-weight: 700;
+            }
+            .bo-distri-tag__placeholder {
+                font-family: 'Nunito', sans-serif;
+                color: $color-secondary;
+                font-weight: 700;
+            }
+        }
+    }
+}

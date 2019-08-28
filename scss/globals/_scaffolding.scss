@@ -41,8 +41,16 @@ body {
     display: block;
     height: $container-height;
     padding: $container-padding $container-padding-side;
+    @include screen-size(large) {
+        overflow: hidden;
+    }
     &.smaller {
         height: $container-height-smaller;    
+    }
+    &.in-pyramid {
+        height: $container-height-in-pyramid;
+        padding: unset;
+        overflow: visible;
     }
 }
 

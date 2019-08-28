@@ -55,6 +55,7 @@
             max-height: 100%;
             max-width: $player-image-width;
             position: absolute;
+            z-index: 0;
         }
 
         .collection-content {
@@ -109,13 +110,14 @@
     background-color: $color-secondary;
     bottom: 0;
     white-space: nowrap;
-    overflow: scroll hidden;
+    overflow: auto hidden;
     -webkit-overflow-scrolling: touch;
     .card {
         display: inline-flex;
-        align-items: center;
+        align-items: flex-start;
         position: relative;
         height: 100%;
+        width: 100%;
         max-width: 23%;
         margin-right: 2px;
         img {
@@ -137,6 +139,7 @@
 .bo-client-container {
     .card:not(.master-playing-card) {
         max-width: 50%;
+        max-height: 50%;
         display: inline-flex;
         img {
             display: block;
@@ -239,12 +242,12 @@
 .notice-container {
     position: absolute;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     align-items: flex-end;
     @include screen-size(mobile) {
         align-items: center;
-        bottom: 4px;
+        bottom: 64px;
     }
     flex-direction: column;
     pointer-events: none;
@@ -270,9 +273,10 @@
         z-index: 2;
         animation: fadein 0.3s forwards ease-in-out;
         span {
-            @include font($font-regular, $color-text-inverted);
+            @include font($font-bold, $color-text-inverted);
+            font-family: 'Nunito', sans-serif;
             text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
-            font-size: 1rem;
+            font-size: 1.2rem;
             @include screen-size(mobile) {
                 font-size: 1.2rem;
                 margin-right: 10px;
@@ -280,7 +284,7 @@
             text-align: center;
             letter-spacing: .03rem;
             strong {
-                @include font($font-bold, $color-text-inverted);
+                @include font($font-extrabold, $color-text-inverted);
             }
             img {
                 max-width: 16px;

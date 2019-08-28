@@ -91,20 +91,30 @@ ac.on('NOTICE', function(device_id, params) {
  * Distribution - Update
  */
 ac.on('DISTRIBUTE_UPDATE', (device_id, params) => {
-  /**
-   * Has:
-   * - params.player_id
-   * - params.distribution_id
-   * - params.distributee --> Player ID of the receiving player
-   * Needs to:
-   * 
-   */
+  let distributor = buzzonline.game_state.manifest[getPlayer(device_id)];
+  let distributee = buzzonline.game_state.manifest[params.distributee_id];
 
+  document.querySelector(`#distributee_${params.distribution_id}`).innerHTML = distributee.nickname
+  
+  ac.sendEvent(distributee.device_id, 'NOTICE', {
+    message: `<strong>${distributor.nickname}</strong>&nbsp;&raquo;&nbsp<img src="dist/img/beer_mono.png">&nbsp;${buzzonline.playfield.getDrinkAmt()}
+              <button class="btn btn-small green n-width" onclick="acknowledgeDistribution('${params.distribution_id}')">&check;</button>`,
+    no_auto_dismiss: true,
+    notice_id: params.distribution_id
+  })
 
+  buzzonline.drink(params.distributee_id, buzzonline.playfield.getDrinkAmt());
 })
 
-ac.on('DISTRIBUTE_ACKNOWLEDGE', () => {
+ac.on('DISTRIBUTE_ACKNOWLEDGE', (device_id, params) => {
+  document.querySelector(`#acknowledge_${params.distribution_id}`).querySelector("button").classList.add("green")
+  
+  delete buzzonline.game_state.distributions[params.distribution_id]
 
+  setTimeout(() => {
+    document.querySelector(`#distribution_${params.distribution_id}`).remove();
+    buzzonline.phase.phase_2.acknowledgeDistribution();
+  }, 2000)
 })
 
 buzzonline.init_ = function () {
@@ -277,18 +287,6 @@ buzzonline.function.startGame = function(device_id, params) {
     console.warn('Device requesting startGame is not the master controller. Aborting...')
   }
 }
-buzzonline.function.prepareTimer = function() {
-
-  //Progress indicator setup script
-  const circle = document.querySelector('.progress-ring__circle')
-  const radius = circle.r.baseVal.value
-  const circumference = radius * 2 * Math.PI
-  circle.style.strokeDasharray = `${circumference} ${circumference}`
-  circle.style.strokeDashoffset = `${circumference}`
-
-  buzzonline.function.prepareTimer.timer = circle
-  buzzonline.function.prepareTimer.timerCircumference = circumference
-}
 
 function bo_timer(callback, delay) {
   //Prepare timeout window binder
@@ -322,34 +320,60 @@ function bo_timer(callback, delay) {
   this.start()
 }
 
-buzzonline.function.activateTimer = function(seconds, callback) {
+buzzonline.function.prepareTimer = function() {
+  const circle = document.querySelector('.progress-ring__circle')
+  const radius = circle.r.baseVal.value
+  const circumference = radius * 2 * Math.PI
+  circle.style.strokeDasharray = `${circumference} ${circumference}`
+  circle.style.strokeDashoffset = `${circumference}`
 
+  buzzonline.function.circle= circle
+  buzzonline.function.circleCircumference = circumference
+}
+
+buzzonline.function.activateTimer = function(seconds, callback) {
     const t_time = seconds * 1000
-    const circle = buzzonline.function.prepareTimer.timer
+    const circle = buzzonline.function.circle
     circle.parentNode.parentNode.style.display = 'flex'
-    var timer = new bo_timer(() => {
+    buzzonline.function.timer = new bo_timer(() => {
     }, t_time)
 
     //Hand over to the runTimer function
-    buzzonline.function.runTimer(t_time, timer, callback)
+    buzzonline.function.runTimer(t_time, callback)
 }
 
-buzzonline.function.runTimer = function (t_time, timer, callback) {
+buzzonline.function.runTimer = function (t_time, callback) {
   var interval = setInterval(() => {
-    var t = timer.getTimeLeft()
-    if(t < 0) {
-      clearInterval(interval)
-      buzzonline.function.prepareTimer.timer.parentNode.parentNode.style.display = 'none'
-      if(typeof callback === 'function')
-        callback()
-      
-      return
+    /**
+     * Check if the timer is paused first
+     * If it's paused, don't do anything.
+     * ResumeTimer will restart the interval.
+     */
+    if(!buzzonline.function.timerPaused) {
+      var t = buzzonline.function.timer.getTimeLeft()
+      if(t < 0) {
+        clearInterval(interval)
+        buzzonline.function.circle.parentNode.parentNode.style.display = 'none'
+        if(typeof callback === 'function')
+          callback()
+        
+        return
+      }
+      const offset = buzzonline.function.circleCircumference - ((t * 100) / t_time) / 100 * buzzonline.function.circleCircumference
+      buzzonline.function.circle.style.strokeDashoffset = offset
+      document.querySelector('.screen-timer__text').innerHTML = Math.ceil(t / 1000)
     }
-    const offset = buzzonline.function.prepareTimer.timerCircumference - ((t * 100) / t_time) / 100 * buzzonline.function.prepareTimer.timerCircumference
-    buzzonline.function.prepareTimer.timer.style.strokeDashoffset = offset
-    document.querySelector('.screen-timer__text').innerHTML = Math.ceil(t / 1000)
   }, 100);
+}
 
+buzzonline.function.pauseTimer = function() {
+  buzzonline.function.timerPaused = true
+  buzzonline.function.timer.pause()
+}
+
+buzzonline.function.resumeTimer = function() {
+  buzzonline.function.timerPaused = false
+  buzzonline.function.timer.start()
 }
 
 buzzonline.setPlayers = function() {
@@ -384,7 +408,7 @@ buzzonline.setPlayer = function(device_id) {
     player_id:        player_id,
     device_id:        device_id,
     drink_amount:     0,
-    cards:            []
+    cards:            {}
   }
 }
 
@@ -500,7 +524,17 @@ buzzonline.phase.phase_1.handler = function() {
 buzzonline.phase.phase_2 = {}
 
 buzzonline.phase.phase_2.handler = function() {
-  ac.broadcastEvent('CLIENT_SORT_CARDS')
+
+  /* Inactivate all players (Choose a device id which is certainly out of range) */
+  ac.sendEvent(AirConsole.SCREEN, 'UPDATE_ACTIVE_PLAYER', {
+    'device_id': 99
+  })
+
+  var timer_timeout = 15
+
+  ac.broadcastEvent('CLIENT_SORT_CARDS', {
+    timeout: timer_timeout * 1000
+  })
 
   ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
     _filename: 'host_pyramid_setup'
@@ -509,13 +543,37 @@ buzzonline.phase.phase_2.handler = function() {
   /* Keep track of the current card we're on */
   buzzonline.game_state.current_card = 0
   
-  buzzonline.notice({
-    notice_id: Math.floor(Math.random() * 100000),
-    message: `Memorize your cards!`,
-    _broadcast: true
-  })
 
-  buzzonline.function.activateTimer(15, function(){
+  // Preload all the cards into the pyramid (hidden next to the placeholders)
+  // Add an interval check to ensure the pyramid setup is loaded
+  var gen_interval = setInterval(() => {
+    if(document.querySelector('#pyr_card_1')) {
+      clearInterval(gen_interval)
+
+      for(i = 1; i < 16; i++) {
+        let card = cardStack.deal(true)
+        view('pyr_card', {
+          _inject: `#pyr_card_${i}`,
+          _append: true,
+          'card.src': card.html,
+          'card.value': card.value,
+          'card.fnr': i
+        })
+      }
+
+      buzzonline.notice({
+        notice_id: generate(8),
+        message: `Memorize your cards!`,
+        _broadcast: true
+      })
+
+      return
+    }
+  }, 200)
+  
+  document.querySelector('#bo_viewport').classList.add('in-pyramid')
+
+  buzzonline.function.activateTimer(timer_timeout, function(){
     /* Start the dealing phase */
     buzzonline.phase.phase_2.deal()
   })
@@ -525,76 +583,74 @@ buzzonline.phase.phase_2.deal = function() {
 
   if(buzzonline.game_state.current_card < 15) {
     /* Start by adding the card to the view */
-    const card = cardStack.deal(true)
     const current_card = ++buzzonline.game_state.current_card
 
-    view('pyr_card', {
-      _inject: `#pyr_card_${current_card}`,
-      'card.src': card.html,
-      'card.value': card.value,
-      'card.fnr': current_card
-    })
+    if(document.querySelector('.card--active'))
+      document.querySelector('.card--active').classList.remove("card--active")
+
+    document.querySelector(`#pyr_card_${current_card}`).querySelector('.card--placeholder').classList.add("hidden")
+    document.querySelector(`#pyr_card_${current_card}`).querySelector('.card-actual').classList.remove("hidden")
+    setTimeout(() => {
+      document.querySelector(`#pyr_card_${current_card}`).querySelector('.card-actual').classList.add("card--active")
+    }, 100)
     buzzonline.function.activateTimer(5, () => {
-      buzzonline.phase.phase_2.checkDistributions()
+      buzzonline.phase.phase_2.deal()
       return
     })
     return
+  } else {
+    /* Phase 2 ended; evaluate Showdown and move on to Phase 3 */
+    buzzonline.phase.phase_2.evaluateShowdown();
   }
 }
 
 buzzonline.phase.phase_2.distribute = function(args) {
-
-  /**
-   * Needs to:
-   *  - Pause the timer
-   *  - Place player on the board as "Waiting for reaction..." [DISTRIBUTE_CREATE {distributor}]
-   *  - Send the playerlist to the distributor.
-   *  - Display player's name, amount of drinks to give for this round, and an empty space for receiving player [DISTRIBUTE_UPDATE {distributor}]
-   *  - Make sure the game is halted until receiving player has finished their drink. (Confirmation from receiving player needed.) [DISTRIBUTE_ACKNOWLEDGE {distributee}]
-   * 
-   */
   let distribution_id = generate(6);
+  let drink_amt = buzzonline.playfield.getDrinkAmt();
   if(!buzzonline.game_state.distributions)
     buzzonline.game_state.distributions = {}
   
   // Pause the timer
   buzzonline.function.pauseTimer()
 
-
   // Create a new distribution
   buzzonline.game_state.distributions[distribution_id] = {
     distributor: args.distributor,
-    drink_amt: buzzonline.playfield.getDrinkAmt(),
+    drink_amt: drink_amt,
     card: args.distributor_card
   }
 
   // Send the distribution to the screen
-  ac.sendEvent(AirConsole.SCREEN, 'DISTRIBUTE_CREATE', {
-    distributor: args.distributor.player_id,
-    distributor_nick: args.distributor.nickname,
-    drink_amt: buzzonline.playfield.getDrinkAmt(args.distributor_card),
-    distribution_id = distribution_id
+  view('component_distri_tag', {
+    _inject: '#bo_distriBase',
+    _append: true,
+    distributor: args.distributor.nickname,
+    distributee: `<div class="bo-distri-tag__placeholder">Choose player...</div>`,
+    drink_amt: drink_amt,
+    distribution_id: distribution_id,
   })
+  document.querySelector("#bo_distriBase").classList.add("show");
 
   // Send the playerlist to the player
   ac.sendEvent(args.device_id, 'VIEW_UPDATE_PLAYERLIST', {
-    _filename: 'player_list',
-    _inject: '#bo_playerlist',
-    text: `<span>Give&nbsp;<img src="dist/img/beer_mono_white.png">&nbsp;<strong>${buzzonline.playfield.getDrinkAmt(args.distributor_card)}</strong>&nbsp;to</span>`,
-    player_buttons: buzzonline.phase.phase_2.generatePlayerButtons(args.distributor.player_id)
+    drink_amt: drink_amt,
+    distribution_id: distribution_id,
+    player_buttons: buzzonline.phase.phase_2.generatePlayerButtons(args.distributor.player_id),
+    card: args.distributor_card
   })
+
+  //Remove the card from the players' gamestate
+  delete buzzonline.game_state.manifest[args.distributor.player_id].cards[args.distributor_card]
 }
 
-buzzonline.phase.phase_2.checkDistributions = function() {
-  /**
-   * Check if there are any running distributions.
-   * 
-   * This function gets called after the deal() timer is over, and when a player acknowledges a distribution (after a 2-second delay).
-   * Resumes the timer if there are no more distributions.
-   */
-  if(buzzonline.game_state.distributions && !Object.entries(buzzonline.game_state.distributions).length)
+/**
+ * Check if any distributions are still running; otherwise resume the timer.
+ */
+buzzonline.phase.phase_2.acknowledgeDistribution = function() {
+  if(buzzonline.game_state.distributions && !Object.entries(buzzonline.game_state.distributions).length){
+    document.querySelector("#bo_distriBase").classList.remove("show")
     buzzonline.function.resumeTimer()
-
+  }
   return
 }
 
@@ -643,7 +699,83 @@ buzzonline.phase.next = function() {
   return
 }
 
+buzzonline.phase.phase_2.evaluateShowdown = function() {
+   // Check the amount of cards everyone has left
+   let highest_card = {
+    value: 0,
+    players: []
+  }
 
+  for(p in buzzonline.game_state.manifest) {
+    let player = buzzonline.game_state.manifest[p]
+    var cards = Object.entries(player.cards).length
+
+    //If this player has the highest card amount, replace the entire object
+    if(cards > highest_card.value) {
+      highest_card.value = cards
+      highest_card.players = [player.player_id]
+
+      //Else, if the player has an equal amount of cards; add them to the array for the Showdown.
+    } else if(cards == highest_card.value) {
+      highest_card.players.push(player.player_id)
+    }
+  }
+
+  // We will end up with the highest amount of cards left in the game, and the player IDs associated with it.
+  
+  // If there is only 1 player in the array, carry on to Phase 3 with this player.
+  if(highest_card.players.length == 1) {
+    buzzonline.phase.phase_3.handler(buzzonline.game_state.manifest[highest_card.players[0]])
+    
+    //Else, we need to call the Showdown function
+  } else {
+    buzzonline.game_state.showdown_manifest = [];
+    for(i in highest_card.players) {
+      buzzonline.game_state.showdown_manifest.push(buzzonline.game_state.manifest[highest_card.players[i]])
+    }
+    buzzonline.phase.phase_2.showdown();
+  }
+}
+
+buzzonline.phase.phase_2.showdown = function() {
+
+  /**
+   * Function to play the showdown.
+   * 
+   * Has to:
+   * - Determine the card that enters Phase 3. (Lowest/Highest) (Asked by a member not on the showdown manifest?)
+   * - Ask every member of the manifest to pull a card from the top or bottom of the card stack
+   * - Pair the card with the person who pulled it.
+   * -  After all members have pulled a card, check who has the lowest/highest card (previously determined)
+   * -  If 1 person has the lowest/highest card, move on to pahse 3 with them.
+   * -  If 2 or more players have the same lowest/highest card, redo the showdown with those players only. Repeat from step 1.
+   */
+}
+
+
+buzzonline.phase.phase_3 = {};
+
+/**
+ * Phase 3 interaction handler
+ * 
+ * @param {Object} player The player object as derived from the `buzzonline.game_state.manifest`.
+ */
+buzzonline.phase.phase_3.handler = function(player){
+  /**
+   * Function to play Phase 3.
+   * 
+   * Has to:
+   * - Display a row of 5 cards.
+   * - Imitate the pyramid of phase 2 in terms of amount of drinks per column.
+   * - Ask the player for higher/lower on the current card in the sequence.
+   * -  If the player answered correctly, move to the next card in the sequence.
+   * -  If the player answered wrong, give them the amount of drinks on the current column and move back to column 1.
+   * - If the deck of cards is empty, reshuffle the deck and start again.
+   * - If the player answers all 5 cards correctly, end Phase 3 and reset the game. (Play an ad, reset and re-read the playerbase into the manifest, reshuffle the deck)
+   * - COULD HAVE: If a player has entered Phase 3 before, start with a few cards closed to up the difficulty 
+   * -   (1 P3 = cards 2 & 4 closed, 2 P3 = cards 1, 3 & 5 closed, 3+ P3 = all closed).
+   */ 
+}
 /**
  * 
  * 
@@ -697,7 +829,8 @@ buzzonline.controllerInteraction.initHandler = function(){
 
     /* Move the card to the players' hand (if in Phase 1) */
     if(buzzonline.game_state.phase == 1) {
-      buzzonline.game_state.manifest[getPlayer(device_id)].cards.push(card)
+      let card_name = `${card.suit}_${card.value}`
+      buzzonline.game_state.manifest[getPlayer(device_id)].cards[card_name] = card
     }
 
     /* Call the continuation handler to start the next player or phase, with a `PHASE_TIMEOUT` second delay so the current player can see their result. */
@@ -711,7 +844,8 @@ buzzonline.controllerInteraction.initHandler = function(){
   ac.on('CLIENT_CARD', (device_id, params) => {
     
     /* Cards can only be handled in Game Phase 2 */
-    if(buzzonline.game_state.phase !== 2) { return }
+    if(buzzonline.game_state.phase !== 2)
+     return
 
     const player = buzzonline.game_state.manifest[getPlayer(device_id)]
 
@@ -739,6 +873,7 @@ buzzonline.controllerInteraction.initHandler = function(){
     } else {
       // Distribute the drink to another player
       buzzonline.phase.phase_2.distribute({
+        device_id: device_id,
         distributor: player,
         distributor_card: params.card
       })
@@ -746,8 +881,9 @@ buzzonline.controllerInteraction.initHandler = function(){
   })
 }
 
-buzzonline.drink = function(player_id) {
-  buzzonline.game_state.manifest[player_id].drink_amount++
+buzzonline.drink = function(player_id, amt = 1) {
+  buzzonline.game_state.manifest[player_id].drink_amount += amt
+
   ac.sendEvent(AirConsole.SCREEN, 'UPDATE_DRINK_AMT', {
     player_id: buzzonline.game_state.manifest[player_id].device_id,
     drinks: buzzonline.game_state.manifest[player_id].drink_amount
@@ -782,7 +918,7 @@ buzzonline.playfield = {};
  * Get the drink amount (Phase 2 and 3 only) by checking which row the current card is in
  */
 buzzonline.playfield.getDrinkAmt = function() {
-  return document.querySelector('#pyr_card_fnr_'+ buzzonline.game_state.current_card).parentNode.parentNode.dataset.drinkAmt;
+  return parseInt(document.querySelector('#pyr_card_fnr_'+ buzzonline.game_state.current_card).parentNode.parentNode.dataset.drinkAmt);
 }
 
 buzzonline.phase.creator = {}
@@ -829,7 +965,7 @@ buzzonline.phase.evaluator.phase_1_1 = function(player_answer, correct_answer, p
 
 buzzonline.phase.evaluator.phase_1_2 = function(player_answer, correct_answer, player_cards) {
     /* Phase 1.2: Player must choose if the provided card is higher or lower than their current card */
-    var player_card = parseInt(player_cards[Object.keys(player_cards)[0]].value)
+    var player_card = parseInt(Object.values(player_cards)[0].value)
     var correct_answer = parseInt(correct_answer)
     return (
       (player_card > correct_answer && player_answer == "lower") ||
@@ -843,7 +979,7 @@ buzzonline.phase.evaluator.phase_1_3 = function(player_answer, correct_answer, p
     let current_values = []
 
     /* First, get the values of the current two cards in the player's hand */
-    for(let card in player_cards) {current_values.push(parseInt(player_cards[card].value))}
+    for(let card of Object.values(player_cards)) {current_values.push(parseInt(card.value))}
 
     /* Next, sort the array from lowest to highest */
     current_values = current_values.sort(function(a, b){return a - b})
@@ -865,26 +1001,19 @@ buzzonline.phase.evaluator.phase_1_4 = function(player_answer, correct_answer, p
     var current_suits = []
 
     /* First, extract all the suits of the cards the player has in their hand */
-    for(var card in player_cards) {
-      if(current_suits.indexOf(player_cards[card].suit) == -1) {
-        current_suits.push(player_cards[card].suit)
+    for(let card of Object.values(player_cards)) {
+      if(current_suits.indexOf(card.suit) == -1) {
+        current_suits.push(card.suit)
       }
     }
 
     /* Then, check if the suit of the provided card was in the player's hand already */
-    var in_hand = false
-    if(current_suits.indexOf(correct_answer) !== -1){
-      in_hand = true
-    }
+    var in_hand = current_suits.indexOf(correct_answer) !== -1
 
     /* Last, evaluate if the player had the same answer as in_hand */
     return player_answer == in_hand
 
     //@TODO: Write a function for evaluating Disco
-}
-
-buzzonline.phase.evaluator.phase_2 = function() {
-
 }
 
 /**
@@ -1079,11 +1208,12 @@ card_stack.imgRepresentation = {
  * @param {Number} amt The amount of numbers to generate
  */
 function generate(amt) {
-  let return_string = ''
-  for(i = 0; i < amt; i++)
-    return_string += Math.floor(Math.random() * 10)
-
-  return return_string
+  var result = '';
+  var chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  for ( var i = 0; i < amt; i++ ) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }
 /**
  * 
@@ -1095,4 +1225,48 @@ function generate(amt) {
  */
  
 if(window.self === window.top) {
+  view("host_pyramid_setup")
+  view("component_distri_tag", {
+    _inject: "#bo_distriBase",
+    _append: true,
+    distribution_id: 123457,
+    distributor: "Guest 1 with longer name",
+    drinkAmt: 4,
+    distributee: "Guest 2",
+    acknowledge_button: `<button type="button" class="btn btn-xsmall btn-outlined transit">&check;</button>`
+  })
+  view("component_distri_tag", {
+    _inject: "#bo_distriBase",
+    _append: true,
+    distribution_id: 123456,
+    distributor: "Guest 1",
+    drinkAmt: 4,
+    distributee: "<div class='bo-distri-tag__placeholder'>Choose player...</div> ",
+    acknowledge_button: `<button type="button" class="btn btn-xsmall btn-outlined transit">&check;</button>`
+  })
+  view("component_distri_tag", {
+    _inject: "#bo_distriBase",
+    _append: true,
+    distribution_id: 123458,
+    distributor: "Guest 4 ger name",
+    drinkAmt: 4,
+    distributee: "Guest 3 with a very long name",
+    acknowledge_button: `<button type="button" class="btn green btn-xsmall transit">&check;</button>`
+  })
+  view("notice", {
+    _inject: "#notice_container",
+    _append: true,
+    message: "This is a <strong>test notification</strong>",
+    message_id: 0
+  })
+  setTimeout(() => {
+    document.querySelector("#bo_distriBase").classList.add("show")
+    setTimeout(() => {
+      document.querySelector("#distributee_123456").innerHTML = "Guest 4";
+    }, 2000)
+    setTimeout(() => {
+      document.querySelector("#acknowledge_123456").querySelector("button").classList.add("green")
+      document.querySelector("#acknowledge_123456").querySelector("button").classList.remove("btn-outlined")
+    }, 5000)
+  }, 500)
 }

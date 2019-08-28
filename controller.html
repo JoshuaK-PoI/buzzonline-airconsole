@@ -52,21 +52,12 @@
           'card.img_src': 'buzzonline__playingcard_C11.png'
         });
         
-        document.querySelector('#bo_playerlist').innerHTML = `
-        <span> Give&nbsp;<img src="dist/img/beer_mono_white.png">&nbsp;<strong>4</strong>&nbsp;to</span>
-        <button type="button" class="btn btn-primary">Guest 1</button>
-        <button type="button" class="btn btn-primary">Guest 3</button>
-        <button type="button" class="btn btn-primary btn-small">Guest 4 with long name</button>
-        <button type="button" class="btn btn-primary">Guest 5</button>
-        <button type="button" class="btn btn-primary">Guest 6</button>
-        <button type="button" class="btn btn-primary">Guest 7</button>
-        <button type="button" class="btn btn-primary">Guest 8</button>
-        <button type="button" class="btn btn-primary">Guest 9</button>`;
-        
-        setTimeout(() => {
-          document.querySelector('#bo_playerlist').classList.remove('hide');
-          document.querySelector('#bo_playerlist').classList.add('show');
-        }, 100)
+        view("notice", {
+          _inject: "#notice_container",
+          _append: true,
+          message: "This is a <strong>test notification</strong> <button type='button' class='btn btn-small green n-width'>&check;</button>",
+          message_id: 0
+        })
       }
   </script>
 </body>

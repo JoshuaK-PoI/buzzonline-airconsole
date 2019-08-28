@@ -11,6 +11,12 @@
             img {
                 max-height: 17vh;
                 transform: rotate(-90deg);
+                transition-duration: 0.5s;
+                z-index: 1;
+                &.card--active {
+                    max-height: 30vh;
+                    transition-duration: 0.5s;
+                }
             }
         }
     }
