@@ -1,3 +1,7 @@
+
+/* Debug mode */
+const DEBUG_MODE = true;
+
 var local = {}; //Local storage
 var ac = new AirConsole({
     setup_document: false
@@ -48,7 +52,11 @@ ac.on('VIEW_UPDATE_PLAYERLIST', function(device_id, params) {
     document.querySelector(`[data-card-properties='${params.card}']`).dataset.keepOpen = true
 
     local.distribution_id = params.distribution_id
-
+    
+    if(DEBUG_MODE) {
+        document.querySelector(`[data-card-properties='${params.card}']`).querySelector(".actual-card").classList.add("hidden")
+        document.querySelector(`[data-card-properties='${params.card}']`).querySelector(".placeholder-card").classList.remove("hidden")
+    }
 
     document.querySelector('#bo_playerlist').innerHTML = `<span>Give&nbsp;<img src="dist/img/beer_mono_white.png">&nbsp;<strong>${params.drink_amt}</strong>&nbsp;to</span>${params.player_buttons}`;
     document.querySelector('#bo_playerlist').classList.add('show');
@@ -100,16 +108,23 @@ ac.on('CLIENT_SORT_CARDS', function(device_id, params, context){
     }
 
     /* After a server-specified amount of time, "close" the cards by flipping the hidden state of the actual card and the back of the card (placeholder-card) */
-    setTimeout(() => {
-        for(card of document.querySelectorAll('.actual-card'))
-            card.classList.add('hidden');
-
-        for(card of document.querySelectorAll('.placeholder-card'))
-            card.classList.remove('hidden');
-
-        /* Reset the pointer events */
-        document.querySelector('.bo-client-container').style.pointerEvents = 'unset';
-    }, params.timeout)
+    if(!DEBUG_MODE) {
+        setTimeout(() => {
+            for(card of document.querySelectorAll('.actual-card'))
+                card.classList.add('hidden');
+    
+            for(card of document.querySelectorAll('.placeholder-card'))
+                card.classList.remove('hidden');
+    
+            /* Reset the pointer events */
+            document.querySelector('.bo-client-container').style.pointerEvents = 'unset';
+        }, params.timeout)
+    } else {
+        setTimeout(() => {
+            /* Reset the pointer events */
+            document.querySelector('.bo-client-container').style.pointerEvents = 'unset';
+        }, params.timeout)
+    }
 })
 
 /**
@@ -153,8 +168,10 @@ function sendCard(e) {
         ac.sendEvent(AirConsole.SCREEN, 'CLIENT_CARD', {
             card: card_to_send
         });
-        e.querySelector(".placeholder-card").classList.add("hidden")
-        e.querySelector(".actual-card").classList.remove("hidden")
+        if(!DEBUG_MODE) {
+            e.querySelector(".placeholder-card").classList.add("hidden")
+            e.querySelector(".actual-card").classList.remove("hidden")
+        }
         //Temporarily disable the card from being clicked to deter spamming the wrong card
         e.dataset.cardDisabled = true
         setTimeout(() => enableCard(e), 2000)
@@ -164,9 +181,10 @@ function sendCard(e) {
 function enableCard(e) {
     if(e.dataset.keepOpen !== "true") {
         e.dataset.cardDisabled = false
-        e.querySelector(".actual-card").classList.add("hidden")
-        e.querySelector(".placeholder-card").classList.remove("hidden")
-        
+        if(!DEBUG_MODE){
+            e.querySelector(".actual-card").classList.add("hidden")
+            e.querySelector(".placeholder-card").classList.remove("hidden")
+        }
     }
 }
 
