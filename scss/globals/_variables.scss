@@ -76,6 +76,7 @@ $font-extrabold:800;
 //Player drawer
 
 $player-drawer-height:          64px;
+$player-card-drawer-height:     128px;
 $player-drawer-width:           calc(100vw / 10);
 $player-drawer-chip-margin:     5px;
 $player-drink-icon-height:      20px;
@@ -90,10 +91,11 @@ $border-radius-standard:        12px;
 
 $container-padding-compensation: 2 * $container-padding;
 $player-drawer-compensation:     $player-drawer-height + $container-padding-compensation;
+$player-card-drawer-compensation:$player-card-drawer-height + $container-padding-compensation;
 
 $container-height:              calc(100% - #{$player-drawer-compensation});
+$mobile-container-height:       calc(100% - #{$player-card-drawer-compensation});
 $container-height-smaller:      calc(100% - #{$player-drawer-compensation} - #{$player-drawer-height});
-$container-height-in-pyramid:   calc(100% - #{$player-drawer-height});
 
 // ------------------------------------
 //         # SITE COMPONENTS

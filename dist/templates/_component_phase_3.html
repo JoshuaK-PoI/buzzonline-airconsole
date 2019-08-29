@@ -1,0 +1,16 @@
+<div id="_question">
+    <h4 class="text-center">
+        <strong>{player.name}</strong>,
+        Is the next card higher or lower than the current card in this column?
+    </h4>
+</div>
+
+<div id="_answer">
+    <button class="btn btn-block btn-large btn-primary darken-4" onClick="sendAnswer(this, true)">
+        Higher &#x25B2;
+    </button>
+
+    <button class="btn btn-block btn-large btn-outlined darken-2" onClick="sendAnswer(this, false)">
+        Lower &#x25BC;
+    </button>
+</div>

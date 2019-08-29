@@ -1,6 +1,6 @@
 
 /* Debug mode */
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 var local = {}; //Local storage
 var ac = new AirConsole({
@@ -31,6 +31,14 @@ ac.on('VIEW_UPDATE_ADDCARD', function (device_id, params, context) {
     
 ac.on('VIEW_UPDATE_REMOVE', function (device_id, params, context) {
     removeFromView(params._element);
+})
+
+ac.on('PLAYER_SHOW_CARD_DRAWER', function(device_id) {
+    document.querySelector('.bo-client-cards').classList.remove('hidden')
+})
+
+ac.on('PLAYER_HIDE_CARD_DRAWER', function(device_id) {
+    document.querySelector('.bo-client-cards').classList.add('hidden')
 })
 
 ac.on('VIEW_UPDATE_GAMEMASTER', function(device_id, params, context){

@@ -39,18 +39,17 @@ body {
 
 .container {
     display: block;
-    height: $container-height;
+    @include screen-size(mobile) {
+        height: $mobile-container-height;
+    }
+
     padding: $container-padding $container-padding-side;
     @include screen-size(large) {
         overflow: hidden;
+        height: $container-height;
     }
     &.smaller {
         height: $container-height-smaller;    
-    }
-    &.in-pyramid {
-        height: $container-height-in-pyramid;
-        padding: unset;
-        overflow: visible;
     }
 }
 

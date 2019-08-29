@@ -1,0 +1,17 @@
+.phase-3-container {
+    height: 100%;    
+    .card-table {
+        flex-direction: row-reverse;
+        .card-table-row {
+            div {
+                max-height: 8%;
+                img {
+                    max-width: 65%;
+                }
+                .card--active {
+                    max-width: 75%;
+                }
+            }
+        }
+    }    
+}

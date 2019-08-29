@@ -103,9 +103,11 @@
 // --------------------------
 
 .bo-client-cards {
-    display: block;
+    display: flex;
+    justify-content: center;
     width: 100%;
-    height: $player-drawer-height;
+    height: $player-card-drawer-height;
+    min-height: 0;
     margin: 0;
     background-color: $color-secondary;
     bottom: 0;
@@ -113,22 +115,18 @@
     overflow: auto hidden;
     -webkit-overflow-scrolling: touch;
     .card {
-        display: inline-flex;
-        align-items: flex-start;
-        position: relative;
         height: 100%;
-        width: 100%;
-        max-width: 23%;
         margin-right: 2px;
+        display: flex;
+        align-items: center;
         img {
             max-height: 100%;
             margin: auto;
             box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.3);
         }
     }
-
-    &.larger {
-        height: 2 * $player-drawer-height;       
+    .hidden {
+        height: 0;
     }
 }
 
@@ -292,7 +290,6 @@
             }
             .btn {
                 display: inline;
-                margin-right: -10px;
                 box-shadow: -1px 0px 4px rgba(0, 0, 0, 0.2);
                 pointer-events: auto;
             }

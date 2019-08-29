@@ -12,7 +12,7 @@
  */
 
 /* Debugging mode - Turn off for normal gameplay */
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 /* Init Airconsole and BuzzOnline objects */
 const buzzonline = {}
@@ -21,7 +21,7 @@ const buzzonline = {}
 ac = new AirConsole()
 
 //Constant values
-const PHASE_TIMEOUT = 1000
+const PHASE_TIMEOUT = 2000
 
 
 ac.onReady = function () {
@@ -31,6 +31,58 @@ ac.onReady = function () {
 /* Use the event-driven AirConsole approach to determine functions */
 ac.onMessage = function (device_id, data) {
   this.dispatchEvent(device_id, data)
+}
+
+/* Reset handler after an ad was shown */
+ac.onAdComplete = function(ad_was_shown) {
+  console.log("Ad complete.")
+  if(!ad_was_shown)
+    console.log("An ad was not shown.")
+  
+  var rounds = ++buzzonline.game_state.rounds
+
+  /* Reset all game parameters */
+  buzzonline.game_state.card_stack = null
+  buzzonline.game_state.current_answer = ''
+  buzzonline.game_state.current_card = 0
+  buzzonline.game_state.current_player = 0
+  buzzonline.game_state.current_row = 0
+  buzzonline.game_state.distributions = null
+  buzzonline.game_state.manifest = null
+  buzzonline.game_state.phase = 1
+  buzzonline.game_state.rounds = rounds
+  buzzonline.game_state.showdown_answer = ''
+  buzzonline.game_state.showdown_current_card = 0
+  buzzonline.game_state.showdown_manifest = null
+  buzzonline.game_state.showdown_manifest_rematch = null
+  buzzonline.game_state.sub_phase = 1
+  for(p in Object.keys(buzzonline.game_state.players)) {
+    buzzonline.game_state.players[p].cards = null
+  }
+
+  /* Send the Next Round screen to the gamemaster */
+  for(p in Object.keys(buzzonline.game_state.players)){
+    var player = buzzonline.game_state.players[p]
+
+    if(player.device_id == buzzonline.game_state.game_master_device_id) {
+      var btn_class   = 'btn btn-primary'
+      var btn_text    = 'Play Again'
+      var btn_onclick = `onclick="ac.sendEvent(AirConsole.SCREEN, 'FUNCTION', {function: 'startGame'})"`
+    } else {
+      var btn_class   = 'btn btn-outlined btn-text-smaller'
+      var btn_text    = `${buzzonline.game_state.game_master_nickname} can start a new game`
+      var btn_onclick = ''
+    }
+  
+
+  ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
+    _filename: 'component_restart_game',
+    'btn.class': btn_class,
+    'btn.onclick': btn_onclick,
+    'btn.text': btn_text
+  })
+
+  }
 }
 
 /* Screen updater */
@@ -157,6 +209,7 @@ buzzonline.startDeviceConnectionListener = function () {
     buzzonline.deviceDisconnectionHandler(device_id)
   }
 }
+
 /**
  * Handles newly incoming players.
  * 
@@ -195,10 +248,12 @@ buzzonline.deviceConnectionHandler = function(device_id) {
     ac.sendEvent(device_id, 'VIEW_UPDATE', {
       _filename:              'start',
       'btn.class':            'btn btn-outlined',
-      'btn.disabled':         'disabled="disabled"',
+      'btn.disabled':         '',
       'btn.text':             `${game_master} will start the game`,
       'master.hide_elements': 'hidden',
-      'btn.text_smaller':     'btn-text-smaller'
+      'btn.text_smaller':     'btn-text-smaller',
+      'btn.small':            '',
+      'btn.onclick':          ''
     })
   }
   
@@ -290,8 +345,10 @@ buzzonline.function.startGame = function(device_id, params) {
 
     /* Start the game handlers. */
     buzzonline.phase.initHandler({reset_players: true})
-    buzzonline.controllerInteraction.initHandler()
-    buzzonline.function.prepareTimer()
+    if(buzzonline.game_state.rounds == 1) {
+      buzzonline.controllerInteraction.initHandler()
+      buzzonline.function.prepareTimer()
+    }
     return
   } else {
     console.warn('Device requesting startGame is not the master controller. Aborting...')
@@ -409,11 +466,16 @@ buzzonline.setPlayer = function(device_id) {
     return;
   }
   
-  if(typeof buzzonline.game_state.players[player_id] !== "undefined") {
+  /* Check if the player is already assgned to this device */
+  if(typeof buzzonline.game_state.players[player_id] !== "undefined" &&
+    buzzonline.game_state.players[player_id].device_id !== device_id) {
+    
     console.warn(`Error: Player ID ${player_id} is already taken by device 
       ${buzzonline.game_state.players[player_id].device_id}`)
-    setTimeout(() => {buzzonline.setPlayer(device_id); return}, 300, device_id)
-    return;
+    buzzonline.notice({
+      message: `Warning: <strong>${nickname}</strong> could not be added to the game.`
+    })
+    return
   }
 
   buzzonline.game_state.players[player_id] = {
@@ -446,7 +508,9 @@ buzzonline.setGameMaster = function(device_id) {
     'btn.disabled':         null,
     'btn.text':             'Start Game',
     'master.hide_elements': null,
-    'btn.text_smaller':     null
+    'btn.text_smaller':     null,
+    'btn.onclick':          `onclick="ac.sendEvent(AirConsole.SCREEN, 'FUNCTION', {function: 'startGame'})"`,
+    'btn.small':            'btn-small'
   })
 }
 /**
@@ -574,6 +638,9 @@ buzzonline.phase.phase_2.handler = function() {
     'device_id': 99
   })
 
+  /* Hide everyone's card drawer */
+  ac.broadcastEvent('PLAYER_HIDE_CARD_DRAWER')
+
   var timer_timeout = 15
 
   if(DEBUG_MODE) {
@@ -605,7 +672,8 @@ buzzonline.phase.phase_2.handler = function() {
           _append: true,
           'card.src': card.html,
           'card.value': card.value,
-          'card.fnr': i
+          'card.fnr': i,
+          hidden: 'hidden'
         })
       }
 
@@ -618,8 +686,6 @@ buzzonline.phase.phase_2.handler = function() {
       return
     }
   }, 200)
-  
-  document.querySelector('#bo_viewport').classList.add('in-pyramid')
 
   buzzonline.function.activateTimer(timer_timeout, function(){
     /* Start the dealing phase */
@@ -657,7 +723,6 @@ buzzonline.phase.phase_2.deal = function() {
     return
   } else {
     /* Phase 2 ended; evaluate Showdown and move on to Phase 3 */
-    document.querySelector('#bo_viewport').classList.remove('in-pyramid')
     buzzonline.phase.phase_2.evaluateShowdown();
   }
 }
@@ -789,6 +854,10 @@ buzzonline.phase.phase_2.showdown = function() {
     showdown_answer: buzzonline.game_state.showdown_answer,
     showdown_participants: buzzonline.phase.phase_2.generateShowdownParticipants()
   })
+
+  /* Reset the card deck */
+  buzzonline.game_state.card_stack = cardStack.generate(false)
+  
   buzzonline.game_state.current_player = 0
   buzzonline.phase.phase_2.showdownNext()
 }
@@ -909,13 +978,6 @@ buzzonline.phase.phase_3.handler = function(player){
    * Function to play Phase 3.
    * 
    * Has to:
-   * - Display a row of 5 cards.
-   * - Imitate the pyramid of phase 2 in terms of amount of drinks per column.
-   * - Ask the player for higher/lower on the current card in the sequence.
-   * -  If the player answered correctly, move to the next card in the sequence.
-   * -  If the player answered wrong, 
-   *    give them the amount of drinks on the current column and move back to column 1.
-   * - If the deck of cards is empty, reshuffle the deck and start again.
    * - If the player answers all 5 cards correctly, end Phase 3 and reset the game. 
    *  (Play an ad, reset and re-read the playerbase into the manifest, reshuffle the deck)
    * - COULD HAVE: If a player has entered Phase 3 before, 
@@ -924,8 +986,144 @@ buzzonline.phase.phase_3.handler = function(player){
    */
   buzzonline.game_state.phase = 3
   buzzonline.game_state.sub_phase = 1
+  buzzonline.game_state.current_row = 1
+
+  /* Refresh the card deck */
+  buzzonline.game_state.card_stack = cardStack.generate(false)
 
   console.log(`Entering Phase 3 with ${player.nickname}`)
+  
+  /* Get the Phase 3 view */
+  view("host_phase_3")
+
+  ac.sendEvent(AirConsole.SCREEN, "UPDATE_ACTIVE_PLAYER", {
+    device_id: player.device_id
+  })
+  
+  /* Wait for the view to load */
+  var phase_interval = setInterval(() => {
+    if(document.querySelector('.phase-3-container')) {
+      clearInterval(phase_interval)
+
+      /* Generate the first 5 cards */
+      buzzonline.phase.phase_3.generate()
+
+      /* After 5 seconds, start the prompt for the player. */
+      buzzonline.function.activateTimer(5, () => {
+        buzzonline.phase.phase_3.deal(player)
+      })
+      return
+    }
+  }, 200)
+  return
+}
+
+/**
+ * Generate the first 5 cards for the Buzz (Phase 3).
+ */
+buzzonline.phase.phase_3.generate = function() {
+
+  for(i = 1; i < 6; i++) {
+    buzzonline.game_state.current_card = i
+    let card = cardStack.deal(true)
+    view('pyr_card_3', {
+      _inject: `[data-drink-amt="${i}"]`,
+      'card.src': card.html,
+      'card.fnr': i,
+      'card.value': card.value,
+      hidden: ''
+    })
+  }
+}
+
+buzzonline.phase.phase_3.deal = function(player) {
+  
+  /* Add 1 to the fnr */
+  var fnr = ++buzzonline.game_state.current_card
+  
+  if(fnr > 52 ) {
+    buzzonline.game_state.current_row = 1
+    buzzonline.phase.phase_3.generate()
+    buzzonline.notice({
+      message: 'Out of cards; resetting deck. Resetting to column 1.',
+      notice_id: generate(6)
+    })
+    buzzonline.function.activateTimer(5, () => {
+      buzzonline.phase.phase_3.deal(player)
+    })
+    return
+  }
+  
+  /* Deal a new card */
+  var card = cardStack.deal(true)
+
+  /* Figure out what row we're on */
+  document.querySelector(`[data-drink-amt="${buzzonline.game_state.current_row}"]`)
+    .insertAdjacentHTML('beforeend', 
+      '<div class="card"><img src="dist/img/cards/buzzonline__playingcard_back.png" class="card--placeholder card--active"></div>')
+
+  view('pyr_card_3', {
+    _inject: `[data-drink-amt="${buzzonline.game_state.current_row}"]`,
+    _append: true,
+    'card.src': card.html,
+    'card.fnr': fnr,
+    'card.value': card.value,
+    hidden: 'hidden'
+  })
+
+  ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
+    _filename: 'component_phase_3',
+    'player.name': player.nickname 
+  })
+}
+
+buzzonline.phase.phase_3.evaluate = function(player, answer) {
+  /* Answer = "higher" == true || "lower" == false */
+
+  /* Remove the placeholder */
+  document.querySelector('.card--placeholder').parentNode.remove()
+
+  /* Show the actual card */
+  var actual_card = document.querySelector(`#pyr_card_fnr_${buzzonline.game_state.current_card}`)
+  actual_card.classList.remove('hidden')
+
+  /* Determine if the answer was correct */
+  var actual_card_value = parseInt(actual_card.dataset.cardValue)
+  var previous_card_value = parseInt(actual_card.parentNode.previousElementSibling.querySelector('img').dataset.cardValue)
+
+  var card_img = actual_card.getAttribute('src').split('/')
+  var card_img_last = card_img.length - 1;
+  if(actual_card_value < previous_card_value && !answer ||
+    actual_card_value > previous_card_value && answer) {
+    /* Guessed correctly, move to next column */
+    buzzonline.game_state.current_row++
+    ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
+      _filename: 'client_right_answer',
+      'card.img_src': card_img[card_img_last]
+    })
+  } else {
+    /* Guessed wrong, penalize and move to row 1 */
+    ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
+      _filename: 'client_wrong_answer',
+      drink_amt: buzzonline.game_state.current_row,
+      'card.img_src': card_img[card_img_last]
+    })
+
+    buzzonline.drink(player.player_id, buzzonline.game_state.current_row)
+
+    /* Reset row */
+    buzzonline.game_state.current_row = 1
+  }
+
+  setTimeout(() => {
+    if(buzzonline.game_state.current_row == 6) {
+      /* Player has exited the Buzz, play an ad and reset the game. */
+      buzzonline.phase.resetGame();
+      return;
+    }
+    /* Deal the next card */
+    buzzonline.phase.phase_3.deal(player)
+  }, 2000)
 }
 
 buzzonline.phase.answered = function() {
@@ -938,26 +1136,31 @@ buzzonline.phase.answered = function() {
 
 buzzonline.phase.next = function() {
   
-  switch(buzzonline.game_state.phase){
-    case 1:
-      /* Up the phase by 1 */
-      if(buzzonline.game_state.sub_phase < 4) {
-        buzzonline.game_state.sub_phase++
-      } else {
-        buzzonline.phase.initHandler({next_phase: true, reset_players: true})
-        return
-      }
-      break
-    case 2:
-    case 3:
-      break
+  if(buzzonline.game_state.phase == 1){
+    /* Up the phase by 1 */
+    if(buzzonline.game_state.sub_phase < 4) {
+      buzzonline.game_state.sub_phase++
+    } else {
+      buzzonline.phase.initHandler({next_phase: true, reset_players: true})
+      return
+    }
   }
-
+  
   /* Init a new phase */
   buzzonline.phase.initHandler({reset_players: true})
   return
 }
 
+buzzonline.phase.resetGame = function() {
+
+  console.log('Game finished; resetting to next round...')
+
+  /* Show an ad.
+     In the onAdShow handler,
+     Continue resetting the game when the ad has shown.
+     */
+  ac.showAd()
+}
 /**
  * 
  * 
@@ -984,6 +1187,14 @@ buzzonline.controllerInteraction.initHandler = function(){
       return
     }
 
+    if(buzzonline.game_state.phase === 3) {
+      buzzonline.phase.phase_3.evaluate(player, params.query)
+      return
+    }
+    /* Show the clent's card drawer in phase 1_1 */
+    if(buzzonline.game_state.phase == 1 && buzzonline.game_state.sub_phase == 1)
+      ac.sendEvent(device_id, 'PLAYER_SHOW_CARD_DRAWER')
+
     if(buzzonline.game_state.manifest[buzzonline.game_state.current_player].device_id !== device_id) {
       console.warn(`Wrong player answered; expected answer from device 
         ${buzzonline.game_state.manifest[buzzonline.game_state.current_player].device_id}, 
@@ -1008,6 +1219,7 @@ buzzonline.controllerInteraction.initHandler = function(){
     ac.sendEvent(device_id, 'VIEW_UPDATE_ADDCARD', {
       _filename: result_file,
       _restore_view: true,
+      drink_amt: 1,
       'card.img_src': card.html,
       'card.rank': card.rank,
       'card.properties': `${card.suit}_${card.value}`
@@ -1015,6 +1227,7 @@ buzzonline.controllerInteraction.initHandler = function(){
 
     ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
       _filename: result_file,
+      drink_amt: 1,
       'card.img_src': card.html
     })
 
@@ -1427,4 +1640,5 @@ function generate(amt) {
  */
  
 if(window.self === window.top) {
+  view("host_phase_3")
 }
