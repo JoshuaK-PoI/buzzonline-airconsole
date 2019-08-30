@@ -1,5 +1,5 @@
 /* Debug mode */
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 
 var local = {}; //Local storage
 var ac = {};
@@ -16,40 +16,54 @@ __master.load = function() {
         this.dispatchEvent(device_id, data);
     };
 
+    ac.on('JOINED_AS_SPECTATOR', function(){
+        local.spectator = true;
+    })
+
+    ac.on('JOIN_GAME', function(){
+        local.spectator = false;
+    })
+
     ac.on('CONTROLLER_VIBRATE', function(device_id, params, context){
-        ac.vibrate(params.time);
+        if(!local.spectator)
+            ac.vibrate(params.time);
     })
 
     ac.on('VIEW_UPDATE', function (device_id, params, context) {
-        view(params._filename, params);
+        if(!local.spectator || params.__ignore_master_spectator)
+            view(params._filename, params);
     })
 
     ac.on('VIEW_UPDATE_ADDCARD', function (device_id, params, context) {
-        addcard(params._filename, params);
+        if(!local.spectator)
+            addcard(params._filename, params);
     })
         
     ac.on('VIEW_UPDATE_REMOVE', function (device_id, params, context) {
-        removeFromView(params._element);
+        if(!local.spectator)
+            removeFromView(params._element);
     })
 
     ac.on('PLAYER_SHOW_CARD_DRAWER', function(device_id) {
-        document.querySelector('.bo-client-cards').classList.remove('hidden')
+        if(!local.spectator)
+            document.querySelector('.bo-client-cards').classList.remove('hidden')
     })
 
     ac.on('PLAYER_HIDE_CARD_DRAWER', function(device_id) {
-        document.querySelector('.bo-client-cards').classList.add('hidden')
+        if(!local.spectator)
+            document.querySelector('.bo-client-cards').classList.add('hidden')
     })
 
     ac.on('VIEW_UPDATE_GAMEMASTER', function(device_id, params, context){
         if(ac.getMasterControllerDeviceId() !== ac.getDeviceId()) {
             /* I am not the master controller */
-            const container = document.querySelector('.button-container')
-            if(container)
-                container.innerHTML = params.gamemaster
+            ac.sendEvent(AirConsole.SCREEN, 'CLIENT_REQUEST_VIEW')
         }
     })
 
     ac.on('VIEW_UPDATE_PLAYERLIST', function(device_id, params) {
+        if(local.spectator) return
+
         /* Disable the main container to prevent clicking cards behind the playerlist */
         document.querySelector('.bo-client-container').style.pointerEvents = 'none';
         document.querySelector('.bo-client-container').dataset.noPointerEventsOverride = true;
@@ -68,8 +82,15 @@ __master.load = function() {
         document.querySelector('#bo_playerlist').innerHTML = `<span>Give&nbsp;<img src="dist/img/beer_mono_white.png">&nbsp;<strong>${params.drink_amt}</strong>&nbsp;to</span>${params.player_buttons}`;
         document.querySelector('#bo_playerlist').classList.add('show');
     })
+    ac.on('CLOSE_PLAYERLIST', function(device_id) {
+        document.querySelector('#bo_playerlist').classList.remove('show');
+        document.querySelector('.bo-client-container').style.pointerEvents = 'unset';
+        document.querySelector('.bo-client-container').dataset.noPointerEventsOverride = false;
+    })
 
     ac.on('NOTICE', function(device_id, params) {
+        if(local.spectator) return
+        
         view('notice', {
             _inject: '#notice_container',
             _append: true,
@@ -81,8 +102,13 @@ __master.load = function() {
             setTimeout(() => {dismiss_notification(params.notice_id)}, 5000, true)
         }
     })
+    ac.on('CLOSE_NOTICE', function(device_id, params) {
+        dismiss_notification(params.notice_id)
+    })
 
     ac.on('CLIENT_SORT_CARDS', function(device_id, params, context){
+        if(local.spectator) return
+
         const cards = document.querySelectorAll('.bo-client-cards .card');
 
         /* First, clean out the view */
@@ -229,8 +255,11 @@ function updateDistribution(distributee_id) {
  * @param {Number} message_id The ID of the notification panel (excluding the `not_`. Eg.: at message panel `#not_345` this variable should be `345`)
  */
 function dismiss_notification(message_id) {
-    document.querySelector(`#not_${message_id}`).classList.add('fadeout')
-    setTimeout(() => {
-        document.querySelector(`#not_${message_id}`).remove()
-    }, 500, true)
+    if(document.querySelector(`#not_${message_id}`)){
+        document.querySelector(`#not_${message_id}`).classList.add('fadeout')
+        setTimeout(() => {
+            if(document.querySelector(`#not_${message_id}`))
+                document.querySelector(`#not_${message_id}`).remove()
+        }, 500, true)
+    }
 }

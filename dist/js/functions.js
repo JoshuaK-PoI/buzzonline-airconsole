@@ -122,8 +122,6 @@ preloader.loaded = 0;
  */
 preloader.done = false;
 preloader.onloaded = function() {
-
-
     /**
      * Re-enable screen input
      */
