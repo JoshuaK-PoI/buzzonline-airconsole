@@ -122,7 +122,12 @@ preloader.loaded = 0;
  */
 preloader.done = false;
 preloader.onloaded = function() {
-    console.log('Preloader is done loading.');
+
+
+    /**
+     * Re-enable screen input
+     */
+    document.querySelector('body').style.pointerEvents = 'unset';
 
     /**
      * Hide the loader
