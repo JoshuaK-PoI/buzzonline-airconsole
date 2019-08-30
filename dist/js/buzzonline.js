@@ -18,163 +18,170 @@ const DEBUG_MODE = false;
 const buzzonline = {}
 
 // eslint-disable-next-line no-undef
-ac = new AirConsole()
+var ac = {}
+var __master = {}
+
+__master.load = function() {
+  ac = new AirConsole()
+  
+  /* Init buzzOnline game vars */
+  buzzonline.init_()
+
+  ac.onReady = function () {
+    buzzonline.start()
+  }
+
+  /* Use the event-driven AirConsole approach to determine functions */
+  ac.onMessage = function (device_id, data) {
+    this.dispatchEvent(device_id, data)
+  }
+
+  /* Reset handler after an ad was shown */
+  ac.onAdComplete = function(ad_was_shown) {
+    console.log("Ad complete.")
+    if(!ad_was_shown)
+      console.log("An ad was not shown.")
+    
+    var rounds = ++buzzonline.game_state.rounds
+
+    /* Reset all game parameters */
+    buzzonline.game_state.card_stack = null
+    buzzonline.game_state.current_answer = ''
+    buzzonline.game_state.current_card = 0
+    buzzonline.game_state.current_player = 0
+    buzzonline.game_state.current_row = 0
+    buzzonline.game_state.distributions = null
+    buzzonline.game_state.manifest = null
+    buzzonline.game_state.phase = 1
+    buzzonline.game_state.rounds = rounds
+    buzzonline.game_state.showdown_answer = ''
+    buzzonline.game_state.showdown_current_card = 0
+    buzzonline.game_state.showdown_manifest = null
+    buzzonline.game_state.showdown_manifest_rematch = null
+    buzzonline.game_state.sub_phase = 1
+    for(p in Object.keys(buzzonline.game_state.players)) {
+      buzzonline.game_state.players[p].cards = null
+    }
+
+    /* Send the Next Round screen to the gamemaster */
+    for(p in Object.keys(buzzonline.game_state.players)){
+      var player = buzzonline.game_state.players[p]
+
+      if(player.device_id == buzzonline.game_state.game_master_device_id) {
+        var btn_class   = 'btn btn-primary'
+        var btn_text    = 'Play Again'
+        var btn_onclick = `onclick="ac.sendEvent(AirConsole.SCREEN, 'FUNCTION', {function: 'startGame'})"`
+      } else {
+        var btn_class   = 'btn btn-outlined btn-text-smaller'
+        var btn_text    = `${buzzonline.game_state.game_master_nickname} can start a new game`
+        var btn_onclick = ''
+      }
+    
+
+    ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
+      _filename: 'component_restart_game',
+      'btn.class': btn_class,
+      'btn.onclick': btn_onclick,
+      'btn.text': btn_text
+    })
+
+    }
+  }
+
+  /* Screen updater */
+  ac.on('VIEW_UPDATE', (device_id, params) => {
+    // eslint-disable-next-line no-undef
+    view(params._filename, params)
+  })
+
+  ac.on('VIEW_UPDATE_REMOVE', (device_id, params) => {
+    // eslint-disable-next-line no-undef
+    removeFromView(params._element)
+  })
+
+  /* Active player updater */
+  ac.on('UPDATE_ACTIVE_PLAYER', (device_id, params) => {
+    const chips = document.querySelectorAll('.chip')
+
+    for (c in chips) {
+      if(!chips[c].classList) { continue }
+
+      chips[c].classList.remove('active')
+      if(chips[c].id === `bo_playerTag_${params.device_id}`){
+        chips[c].classList.add('active')
+      }
+    }
+  })
+
+  /* Drink amount updater */
+  ac.on('UPDATE_DRINK_AMT', (device_id, params) => {
+    const drinks = document.querySelector('#drinks_'+params.player_id)
+    const drinksIcon = document.querySelector('#icon_drinks_'+params.player_id)
+
+    drinks.innerHTML = params.drinks
+    drinksIcon.classList.add('drink-animation')
+
+    setTimeout(() => {drinksIcon.classList.remove('drink-animation')}, 1000)
+  })
+
+  ac.on('NOTICE', function(device_id, params) {
+    view('notice', {
+      _inject: '#notice_container',
+      _append: true,
+      message: params.message,
+      message_id: params.notice_id
+    })
+
+    setTimeout(() => {
+      document.querySelector(`#not_${params.notice_id}`).classList.add('fadeout')
+      setTimeout(() => {
+        document.querySelector(`#not_${params.notice_id}`).remove()
+      }, 500, true)
+    }, 5000, true)
+  })
+
+
+  /**
+   * Gameplay mechanics
+   */
+
+  /**
+   * Distribution - Update
+   */
+  ac.on('DISTRIBUTE_UPDATE', (device_id, params) => {
+    let distributor = buzzonline.game_state.manifest[getPlayer(device_id)];
+    let distributee = buzzonline.game_state.manifest[params.distributee_id];
+
+    document.querySelector(`#distributee_${params.distribution_id}`)
+      .innerHTML = distributee.nickname
+    
+    ac.sendEvent(distributee.device_id, 'NOTICE', {
+      message: `<strong>${distributor.nickname}</strong>&nbsp;&raquo;&nbsp
+                <img src="dist/img/beer_mono.png">&nbsp;${buzzonline.playfield.getDrinkAmt()}
+                <button class="btn btn-small green n-width" 
+                onclick="acknowledgeDistribution('${params.distribution_id}')">&check;</button>`,
+      no_auto_dismiss: true,
+      notice_id: params.distribution_id
+    })
+
+    buzzonline.drink(params.distributee_id, buzzonline.playfield.getDrinkAmt());
+  })
+
+  ac.on('DISTRIBUTE_ACKNOWLEDGE', (device_id, params) => {
+    document.querySelector(`#acknowledge_${params.distribution_id}`)
+      .querySelector("button").classList.add("green")
+    
+    delete buzzonline.game_state.distributions[params.distribution_id]
+
+    setTimeout(() => {
+      document.querySelector(`#distribution_${params.distribution_id}`).remove();
+      buzzonline.phase.phase_2.acknowledgeDistribution();
+    }, 2000)
+  })
+}
 
 //Constant values
 const PHASE_TIMEOUT = 2000
-
-
-ac.onReady = function () {
-  buzzonline.start()
-}
-
-/* Use the event-driven AirConsole approach to determine functions */
-ac.onMessage = function (device_id, data) {
-  this.dispatchEvent(device_id, data)
-}
-
-/* Reset handler after an ad was shown */
-ac.onAdComplete = function(ad_was_shown) {
-  console.log("Ad complete.")
-  if(!ad_was_shown)
-    console.log("An ad was not shown.")
-  
-  var rounds = ++buzzonline.game_state.rounds
-
-  /* Reset all game parameters */
-  buzzonline.game_state.card_stack = null
-  buzzonline.game_state.current_answer = ''
-  buzzonline.game_state.current_card = 0
-  buzzonline.game_state.current_player = 0
-  buzzonline.game_state.current_row = 0
-  buzzonline.game_state.distributions = null
-  buzzonline.game_state.manifest = null
-  buzzonline.game_state.phase = 1
-  buzzonline.game_state.rounds = rounds
-  buzzonline.game_state.showdown_answer = ''
-  buzzonline.game_state.showdown_current_card = 0
-  buzzonline.game_state.showdown_manifest = null
-  buzzonline.game_state.showdown_manifest_rematch = null
-  buzzonline.game_state.sub_phase = 1
-  for(p in Object.keys(buzzonline.game_state.players)) {
-    buzzonline.game_state.players[p].cards = null
-  }
-
-  /* Send the Next Round screen to the gamemaster */
-  for(p in Object.keys(buzzonline.game_state.players)){
-    var player = buzzonline.game_state.players[p]
-
-    if(player.device_id == buzzonline.game_state.game_master_device_id) {
-      var btn_class   = 'btn btn-primary'
-      var btn_text    = 'Play Again'
-      var btn_onclick = `onclick="ac.sendEvent(AirConsole.SCREEN, 'FUNCTION', {function: 'startGame'})"`
-    } else {
-      var btn_class   = 'btn btn-outlined btn-text-smaller'
-      var btn_text    = `${buzzonline.game_state.game_master_nickname} can start a new game`
-      var btn_onclick = ''
-    }
-  
-
-  ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
-    _filename: 'component_restart_game',
-    'btn.class': btn_class,
-    'btn.onclick': btn_onclick,
-    'btn.text': btn_text
-  })
-
-  }
-}
-
-/* Screen updater */
-ac.on('VIEW_UPDATE', (device_id, params) => {
-  // eslint-disable-next-line no-undef
-  view(params._filename, params)
-})
-
-ac.on('VIEW_UPDATE_REMOVE', (device_id, params) => {
-  // eslint-disable-next-line no-undef
-  removeFromView(params._element)
-})
-
-/* Active player updater */
-ac.on('UPDATE_ACTIVE_PLAYER', (device_id, params) => {
-  const chips = document.querySelectorAll('.chip')
-
-  for (c in chips) {
-    if(!chips[c].classList) { continue }
-
-    chips[c].classList.remove('active')
-    if(chips[c].id === `bo_playerTag_${params.device_id}`){
-      chips[c].classList.add('active')
-    }
-  }
-})
-
-/* Drink amount updater */
-ac.on('UPDATE_DRINK_AMT', (device_id, params) => {
-  const drinks = document.querySelector('#drinks_'+params.player_id)
-  const drinksIcon = document.querySelector('#icon_drinks_'+params.player_id)
-
-  drinks.innerHTML = params.drinks
-  drinksIcon.classList.add('drink-animation')
-
-  setTimeout(() => {drinksIcon.classList.remove('drink-animation')}, 1000)
-})
-
-ac.on('NOTICE', function(device_id, params) {
-  view('notice', {
-    _inject: '#notice_container',
-    _append: true,
-    message: params.message,
-    message_id: params.notice_id
-  })
-
-  setTimeout(() => {
-    document.querySelector(`#not_${params.notice_id}`).classList.add('fadeout')
-    setTimeout(() => {
-      document.querySelector(`#not_${params.notice_id}`).remove()
-    }, 500, true)
-  }, 5000, true)
-})
-
-
-/**
- * Gameplay mechanics
- */
-
-/**
- * Distribution - Update
- */
-ac.on('DISTRIBUTE_UPDATE', (device_id, params) => {
-  let distributor = buzzonline.game_state.manifest[getPlayer(device_id)];
-  let distributee = buzzonline.game_state.manifest[params.distributee_id];
-
-  document.querySelector(`#distributee_${params.distribution_id}`)
-    .innerHTML = distributee.nickname
-  
-  ac.sendEvent(distributee.device_id, 'NOTICE', {
-    message: `<strong>${distributor.nickname}</strong>&nbsp;&raquo;&nbsp
-              <img src="dist/img/beer_mono.png">&nbsp;${buzzonline.playfield.getDrinkAmt()}
-              <button class="btn btn-small green n-width" 
-              onclick="acknowledgeDistribution('${params.distribution_id}')">&check;</button>`,
-    no_auto_dismiss: true,
-    notice_id: params.distribution_id
-  })
-
-  buzzonline.drink(params.distributee_id, buzzonline.playfield.getDrinkAmt());
-})
-
-ac.on('DISTRIBUTE_ACKNOWLEDGE', (device_id, params) => {
-  document.querySelector(`#acknowledge_${params.distribution_id}`)
-    .querySelector("button").classList.add("green")
-  
-  delete buzzonline.game_state.distributions[params.distribution_id]
-
-  setTimeout(() => {
-    document.querySelector(`#distribution_${params.distribution_id}`).remove();
-    buzzonline.phase.phase_2.acknowledgeDistribution();
-  }, 2000)
-})
 
 buzzonline.init_ = function () {
   this.game_state = {
@@ -186,9 +193,6 @@ buzzonline.init_ = function () {
     players: {}
   }
 }
-
-/* Init buzzOnline game vars */
-buzzonline.init_()
 
 buzzonline.start = function () {
   /* Start the airconsole listener */
@@ -1640,5 +1644,4 @@ function generate(amt) {
  */
  
 if(window.self === window.top) {
-  view("host_phase_3")
 }

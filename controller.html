@@ -14,16 +14,26 @@
   <title>BuzzOnline - CONTROLLER</title>
 
   <link href="https://fonts.googleapis.com/css?family=Hind+Guntur:300,400,500,600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/dist/css/style.css?v=3">
+  <link rel="stylesheet" href="/dist/css/style.css?v=newest_300819">
   <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800&display=swap" rel="stylesheet"> 
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
 </head>
 <body>
+  <!-- Loader -->
+  <div class="loader-container">
+    <div class="loader">
+      <div class="loader-text"></div>
+      <div class="loader-progress">
+        <div class="loader-progress--bar"></div>
+      </div>
+    </div>
+  </div>
+  <!-- /Loader -->
 
   <!-- Notice container -->
   <div id="notice_container" class="notice-container"></div>
   <!-- /Notice container -->
-  <div class="container bo-client-container" id="bo_viewport">
+  <div class="container bo-client-container hidden" id="bo_viewport">
 
   </div>
   <div class="bo-client-cards hidden">
@@ -35,9 +45,9 @@
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
-  <script type="text/javascript" src="dist/js/airconsole-events.js?v=3"></script>
-  <script type="text/javascript" src="dist/js/functions.js?v=3"></script>
-  <script type="text/javascript" src="dist/js/functions-controller.js?v=3"></script>
+  <script type="text/javascript" src="dist/js/airconsole-events.js?v=newest_300819"></script>
+  <script type="text/javascript" src="dist/js/functions.js?v=newest_300819"></script>
+  <script type="text/javascript" src="dist/js/functions-controller.js?v=newest_300819"></script>
   <script type="text/javascript">
 
       /**
@@ -48,16 +58,6 @@
        */
       if(window.self === window.top) {
         /* Not in iFrame, so run test data */
-        addcard('component_phase_1_1', {
-          'card.img_src': 'buzzonline__playingcard_C11.png'
-        });
-        
-        view("notice", {
-          _inject: "#notice_container",
-          _append: true,
-          message: "This is a <strong>test notification</strong> <button type='button' class='btn btn-small green n-width'>&check;</button>",
-          message_id: 0
-        })
       }
   </script>
 </body>
