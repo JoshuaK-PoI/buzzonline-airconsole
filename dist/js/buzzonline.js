@@ -56,12 +56,12 @@ __master.load = function() {
     buzzonline.game_state.showdown_manifest = {}
     buzzonline.game_state.showdown_manifest_rematch = {}
     buzzonline.game_state.sub_phase = 1
-    for(p in Object.keys(buzzonline.game_state.players)) {
+    for(p of Object.keys(buzzonline.game_state.players)) {
       buzzonline.game_state.players[p].cards = {}
     }
 
     /* Send the Next Round screen to the gamemaster */
-    for(p in Object.keys(buzzonline.game_state.players)){
+    for(p of Object.keys(buzzonline.game_state.players)){
       var player = buzzonline.game_state.players[p]
 
       if(player.device_id == buzzonline.game_state.game_master_device_id) {
@@ -266,7 +266,7 @@ buzzonline.deviceDisconnectionHandler = function(device_id) {
   /* Get the player ID from the manifest */
   var player = null;
   if(buzzonline.game_state.players) {
-    for(p in Object.keys(buzzonline.game_state.players)) {
+    for(p of Object.keys(buzzonline.game_state.players)) {
       if(buzzonline.game_state.players[p].device_id == device_id) {
         /* Found player */
         player = buzzonline.game_state.players[p]
@@ -598,6 +598,12 @@ buzzonline.setPlayer = function(device_id, from_disconnection = false) {
   if(player) {
     /* Create new object with existing player data */
     buzzonline.game_state.players[player_id] = player
+    
+    /* Remove the old player object */
+    delete buzzonline.game_state.players[player.player_id]
+
+    /* Set the new player ID in the new object */
+    buzzonline.game_state.players[player_id].player_id = player_id
   } else {
     /* Create a fresh object */
     buzzonline.game_state.players[player_id] = {
@@ -607,14 +613,6 @@ buzzonline.setPlayer = function(device_id, from_disconnection = false) {
       drink_amount:     0,
       cards:            {}
     }  
-  }
-  
-  /* Check if any previous references to this player exist (eg. after a move) */
-  for(p in Object.keys(buzzonline.game_state.players)) {
-    if(buzzonline.game_state.players[p] &&
-      buzzonline.game_state.players[p].device_id == device_id &&
-      buzzonline.game_state.players[p].player_id !== player_id)
-      delete buzzonline.game_state.players[p]
   }
 }
 /**
@@ -1235,6 +1233,12 @@ buzzonline.phase.phase_3.deal = function(player) {
     'card.value': card.value,
     hidden: 'hidden'
   })
+  
+  view('phase_3_banner', {
+    _inject: '#bo_banner_placeholder',
+    color: 'primary',
+    text: `${player.nickname}, Is the next card higher or lower than the current card in this column?`
+  })
 
   ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
     _filename: 'component_phase_3',
@@ -1266,6 +1270,12 @@ buzzonline.phase.phase_3.evaluate = function(player, answer) {
       _filename: 'client_right_answer',
       'card.img_src': card_img[card_img_last]
     })
+
+    view('phase_3_banner', {
+      _inject: '#bo_banner_placeholder',
+      color: 'green',
+      text: `Correct! Moving on...`
+    })
   } else {
     /* Guessed wrong, penalize and move to row 1 */
     ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
@@ -1275,6 +1285,12 @@ buzzonline.phase.phase_3.evaluate = function(player, answer) {
     })
 
     buzzonline.drink(player.player_id, buzzonline.game_state.current_row)
+
+    view('phase_3_banner', {
+      _inject: '#bo_banner_placeholder',
+      color: 'red',
+      text: `Guessed wrong! Back we go...`
+    })
 
     /* Reset row */
     buzzonline.game_state.current_row = 1
@@ -1319,6 +1335,7 @@ buzzonline.phase.next = function() {
 }
 
 buzzonline.phase.resetGame = function() {
+  document.querySelector('#bo_banner_placeholder').innerHTML = '';
   buzzonline.game_state.in_progress = false
   /* Show an ad.
      In the onAdShow handler,

@@ -36,6 +36,23 @@ body {
     }
 }
 
+.develop {
+    pointer-events: none;
+    z-index: 0;
+    font-size: 3rem;
+    font-weight: $font-extrabold;
+    color: rgba(255, 255, 255, 0.1);
+    text-shadow: 0px 0px;
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    @include screen-size(mobile) {
+        font-size: 1.5rem;
+        bottom: 20px;
+    }
+}
+
+
 // Container to show loaded state at start of game
 .loader-container {
     width: calc(100vw - 80px);
@@ -82,8 +99,29 @@ body {
     &.smaller {
         height: $container-height-smaller;    
     }
+
+    opacity: 1;
+    transition-duration: 75ms;
+    &.fadeout {
+        opacity: 0;
+    } 
 }
 
+.banner-container {
+    display: flex;
+    height: 10%;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 40px;
+    .panel {
+        width: 80%;
+        height: 120px;
+        max-height: 100%;
+
+    }
+
+}
 // ----------------------------------
 // Color scaffolding
 // ----------------------------------
@@ -95,6 +133,9 @@ body {
     background-color: $color-green;
 }
 
+.primary {
+    background-color: $color-secondary;
+}
 
 // ----------------------------------
 // Page Elements

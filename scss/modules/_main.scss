@@ -52,7 +52,7 @@
     .chip {
         display: inline-block;
         height: calc(#{$player-drawer-height} - (2*#{$player-drawer-chip-margin}));
-        margin: $player-drawer-chip-margin;
+        margin: $player-drawer-chip-margin 0px;
         border-radius: $border-radius-standard;
         background-color: $color-primary;
         overflow: hidden;
@@ -214,33 +214,6 @@
 .bo-client-cards {
     transition-duration: .5s;
 }
-
-.fadeout {
-    animation: fadeout .2s forwards;
-}
-
-.fadeout {
-    animation: fadein .2s forwards;
-}
-
-@keyframes fadeout {
-    0% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-@keyframes fadein {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
 
 // --------------------------
 //     Notice panel

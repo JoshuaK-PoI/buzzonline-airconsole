@@ -1,5 +1,5 @@
 /* Debug mode */
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 var local = {}; //Local storage
 var ac = {};

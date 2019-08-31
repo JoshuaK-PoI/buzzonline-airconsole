@@ -34,10 +34,10 @@ function view(file, params = {}) {
             document.querySelector(querySelector).classList.add('fadeout');
             setTimeout(() => {
               document.querySelector(querySelector).innerHTML = res;
-              document.querySelector(querySelector).classList.remove('fadeout');
-              document.querySelector(querySelector).classList.add('fadein');
-              document.querySelector(querySelector).classList.remove('fadein');
-            }, 200);
+              setTimeout(() => {
+                document.querySelector(querySelector).classList.remove('fadeout');
+              }, 100)
+            }, 200)
           } else {
             document.querySelector(querySelector).innerHTML = res
           }
