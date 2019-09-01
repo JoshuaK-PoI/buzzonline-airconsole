@@ -33,8 +33,21 @@
   <!-- Notice container -->
   <div id="notice_container" class="notice-container"></div>
   <!-- /Notice container -->
-  <div class="container bo-client-container hidden" id="bo_viewport">
-
+  <div class="bo-player-status-bar">
+    <div class="bo-player-status-bar--user">
+      <div class="text" id="player_nickname">
+        Player
+      </div>
+    </div>
+    <div class="bo-player-status-bar--drinks">
+      <img src="/dist/img/beer_mono_white.png" id="player_drink_icon"> 
+      <div class="text" id="player_drink_amt">
+        0
+      </div>
+    </div>
+  </div>
+  <div class="container bo-client-container hidden full-height" id="bo_viewport">
+      
   </div>
   <div class="bo-client-cards hidden">
     
@@ -63,6 +76,15 @@
        */
       if(window.self === window.top) {
         /* Not in iFrame, so run test data */
+        
+        setTimeout(() => {
+          view('notice', {
+              _inject: '#notice_container',
+              _append: true,
+              message: 'This is a test notification',
+              message_id: 1
+          })
+        }, 500)
       }
   </script>
 </body>

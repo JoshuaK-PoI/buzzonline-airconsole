@@ -7,6 +7,9 @@
 .bologo-img {
     display: block;
     max-height: 250px;
+    @include screen-size(xsmall) {
+        max-height: 135px;
+    }
     max-width: 100%;
     margin: 0 auto;
 }
@@ -46,62 +49,60 @@
 .bo-player-drawer {
     background-color: $player-drawer-color;
     height: $player-drawer-height;
-    overflow: hidden;
-
-    // Player chips
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    
+    
     .chip {
-        display: inline-block;
-        height: calc(#{$player-drawer-height} - (2*#{$player-drawer-chip-margin}));
-        margin: $player-drawer-chip-margin 0px;
-        border-radius: $border-radius-standard;
-        background-color: $color-primary;
-        overflow: hidden;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        flex: 1 0 11%;
         transition-duration: 0.3s;
-        
+        height: $player-chip-height;
+        min-width: 10%;
+        max-width: 25%;
+        padding: 0px 5px;
         .bo-playertag-profile {
-            display: inline-block;
-            max-height: 100%;
-            max-width: $player-image-width;
-            position: absolute;
-            z-index: 0;
+            height: $player-chip-height;
+            margin-right: 5px;
         }
 
         .collection-content {
-            display: inline-block;
-            overflow: hidden;
-            color: $color-text-primary;
-            height: 100%;
-            width: calc(#{$player-drawer-width} - #{$player-image-width});
-            margin-left: $player-image-width + 6px;
-            height: ($player-drawer-height - ($player-drawer-chip-margin * 2) );
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0);
+            border-radius: $border-radius-standard;
 
+            background-image: linear-gradient(-0.2turn, $color-primary 33%, $color-primary 50%, $color-green 100%);
+            background-size: 300% auto;
+            background-position: 100% 0;
+            transition: background-position 0.5s;
+            // Player name
             span {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                display: block;
-                height: ($player-drawer-height - ($player-drawer-chip-margin * 2) ) / 2;
-                line-height: 34px;
-                vertical-align: middle;
             }
 
+            // Second row
             .collection-addon {
-                height: ($player-drawer-height - ($player-drawer-chip-margin * 2) ) / 2;
-            
+
+                // Beer icon
                 img {
                     height: $player-drink-icon-height;
-                    line-height: $player-drink-icon-height;
-                    vertical-align: middle;
                 }
             
+                // Drink count
                 span {
-                    overflow: unset;
-                    display: inline-block;
                 }
             }
         }
 
         &.active {
-            background-color: $color-green;
+            .collection-content {
+                background-position: 0 0;
+            }
         }
     }
 }
@@ -144,14 +145,18 @@
 // --------------------------
 .bo-client-container {
     .card:not(.master-playing-card) {
-        max-width: 50%;
-        max-height: 50%;
-        display: inline-flex;
+        max-width: 49%;
+        line-height: 0;
         img {
-            display: block;
-            margin: 0 auto;
-            max-width: 90%;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
+    }
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
+        height: calc(100% - 20px)
     }
 }
 
@@ -165,13 +170,27 @@
     height: 100%;
 }
 
-
+.side-card, 
 .master-playing-card {
-    .card-content {
-        img {
-            display: block;
-            max-height: 100%;
-            margin: 20px auto;
+    img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+}
+
+.card-panel {
+    height: calc(100% - 50px);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    .card {
+        display: flex;
+        max-height: 90%;
+        &.side-card {
+            max-width: 15%;
+        }
+        &.master-playing-card {
+            height: 100%;
         }
     }
 }
@@ -180,15 +199,30 @@
     display: flex;
     width: calc(100% - 40px);
     border-radius: $border-radius-standard;
-    max-height: 30%;
-    min-height: 20%;
+    height: 15%;
+    @include screen-size(mobile) {
+        height: 25%;
+    }
     justify-content: center;
     align-items: center;
     padding: 0 20px;
-}
-
-.card-panel {
-    height: 70%;
+    .panel-content {
+        width: 100%;
+        .btn {
+            display: inline;
+            width: 280px;
+        }
+    }
+    
+    @include screen-size(mobile) {
+        width: calc(100% + 2 * #{$container-padding-side});
+        border-radius: 0;
+        margin-left: -#{$container-padding-side};
+        padding: 0;
+        .panel-content {
+            padding: 0 20px;
+        }
+    }
 }
 
 .drink-animation {
@@ -215,68 +249,3 @@
     transition-duration: .5s;
 }
 
-// --------------------------
-//     Notice panel
-// --------------------------
-.notice-container {
-    position: absolute;
-    width: 100%;
-    z-index: 2;
-    display: flex;
-    align-items: flex-end;
-    @include screen-size(mobile) {
-        align-items: center;
-        bottom: 64px;
-    }
-    flex-direction: column;
-    pointer-events: none;
-    .notice-panel {
-        min-width: 20%;
-        max-width: 50%;
-        margin: 5px;
-        background-color: rgba(255, 255, 255, 0.8);
-        border-radius: $border-radius-standard;
-        padding: 20px;
-        box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
-        @include screen-size(mobile) {
-            max-width: 95%;
-            padding: 0 0 0 10px;
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 4px 4px 16px rgba(255, 255, 255, 0.1);
-            min-height: 48px;
-        }
-        transition-duration: 1s;
-        display: flex;
-        align-items: center;
-        flex-direction: row;
-        z-index: 2;
-        animation: fadein 0.3s forwards ease-in-out;
-        span {
-            @include font($font-bold, $color-text-inverted);
-            font-family: 'Nunito', sans-serif;
-            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
-            font-size: 1.2rem;
-            @include screen-size(mobile) {
-                font-size: 1.2rem;
-                margin-right: 10px;
-            }
-            text-align: center;
-            letter-spacing: .03rem;
-            strong {
-                @include font($font-extrabold, $color-text-inverted);
-            }
-            img {
-                max-width: 16px;
-                max-height: 16px;
-            }
-            .btn {
-                display: inline;
-                box-shadow: -1px 0px 4px rgba(0, 0, 0, 0.2);
-                pointer-events: auto;
-            }
-        }
-        &.fadeout {
-            animation: fadeout 0.3s forwards ease-in-out;
-        }
-    }
-}

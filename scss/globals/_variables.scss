@@ -37,7 +37,7 @@ $color-secondary:       $color-blue;
 $color-accent:          $color-light-blue;
 
 $background-color:      $color-primary;
-$player-drawer-color:   $color-secondary; 
+$player-drawer-color:   $color-primary; 
 
 $color-text-primary:    $color-white;
 $color-text-secondary:  $color-light-blue;
@@ -78,23 +78,28 @@ $font-extrabold:800;
 $player-drawer-height:          64px;
 $player-card-drawer-height:     128px;
 $player-drawer-width:           calc(100vw / 10);
-$player-drawer-chip-margin:     5px;
+$player-chip-height:            54px;
 $player-drink-icon-height:      20px;
-$player-image-width:            $player-drawer-height - (2 * $player-drawer-chip-margin);
 
 
 //Site container
 
-$container-padding:             36px;
+$container-padding:             35px;
+$container-padding-xsmall:       5px;
 $container-padding-side:        32px;
+$container-padding-side-xsmall: 10px;
 $border-radius-standard:        12px;
 
-$container-padding-compensation: 2 * $container-padding;
-$player-drawer-compensation:     $player-drawer-height + $container-padding-compensation;
-$player-card-drawer-compensation:$player-card-drawer-height + $container-padding-compensation;
+$container-padding-compensation:        2 * $container-padding;
+$container-padding-xsmall-compensation: $container-padding + $container-padding-xsmall;
+
+$player-drawer-compensation:            $player-drawer-height + $container-padding-compensation;
+$player-card-drawer-compensation:       $player-card-drawer-height + $container-padding-compensation;
+$player-card-drawer-xsmall-compensation:$player-card-drawer-height + $container-padding-xsmall-compensation;
 
 $container-height:              calc(100% - #{$player-drawer-compensation});
 $mobile-container-height:       calc(100% - #{$player-card-drawer-compensation});
+$mobile-container-height-xsmall:calc(100% - #{$player-card-drawer-xsmall-compensation});
 $container-height-smaller:      calc(100% - #{$player-drawer-compensation} - #{$player-drawer-height});
 
 // ------------------------------------

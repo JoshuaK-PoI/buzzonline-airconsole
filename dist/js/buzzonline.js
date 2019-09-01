@@ -120,6 +120,9 @@ __master.load = function() {
     drinksIcon.classList.add('drink-animation')
 
     setTimeout(() => {drinksIcon.classList.remove('drink-animation')}, 1000)
+    ac.sendEvent(params.player_id, 'UPDATE_DRINK_AMT', {
+      drinks: params.drinks
+    })
   })
 
   ac.on('NOTICE', function(device_id, params) {
@@ -265,7 +268,7 @@ buzzonline.deviceSendStart = function(device_id) {
 buzzonline.deviceDisconnectionHandler = function(device_id) {
   /* Get the player ID from the manifest */
   var player = null;
-  if(buzzonline.game_state.players) {
+  if(Object.entries(buzzonline.game_state.players).length ) {
     for(p of Object.keys(buzzonline.game_state.players)) {
       if(buzzonline.game_state.players[p].device_id == device_id) {
         /* Found player */
@@ -770,10 +773,18 @@ buzzonline.phase.phase_1.handler = function() {
       }
     }
 
+    /* Prepare a Client Card preview array */
+    var client_card = ['','',''];
+    for(p in Object.keys(buzzonline.game_state.players[manifest.player_id].cards)) {
+      var current_card = buzzonline.game_state.players[manifest.player_id].cards[Object.keys(buzzonline.game_state.players[manifest.player_id].cards)[p]];
+      client_card[p] = '<img src="/dist/img/cards/'+current_card.html+'">';
+    }
     /* Send the screen equivalent, and update the screen to reflect the new active player. */
-    ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
-      _filename: `host_phase_${buzzonline.game_state.phase}_${buzzonline.game_state.sub_phase}`,
-      'player.name': manifest.nickname
+    view(`host_phase_${buzzonline.game_state.phase}_${buzzonline.game_state.sub_phase}`, {
+      'player.name': manifest.nickname,
+      client_card_1: client_card[0],
+      client_card_2: client_card[1],
+      client_card_3: client_card[2]
     })
 
     ac.sendEvent(AirConsole.SCREEN, 'UPDATE_ACTIVE_PLAYER', {
@@ -1394,8 +1405,10 @@ buzzonline.controllerInteraction.initHandler = function(){
     /* Send the result to the screen and the player. */
     if(result) {
       result_file = 'client_right_answer'
+      result_host_file = 'host_right_answer'
     } else {
       result_file = 'client_wrong_answer'
+      result_host_file = 'host_wrong_answer'
       buzzonline.drink(getPlayer(device_id))
     }
 
@@ -1408,9 +1421,23 @@ buzzonline.controllerInteraction.initHandler = function(){
       'card.properties': `${card.suit}_${card.value}`
     })
 
-    ac.sendEvent(AirConsole.SCREEN, 'VIEW_UPDATE', {
-      _filename: result_file,
+
+    /* Prepare a Client Card preview array */
+    var client_card = ['','','']
+    for(p in Object.keys(buzzonline.game_state.players[player.player_id].cards)) {
+      var current_card = buzzonline.game_state.players[player.player_id].cards[Object.keys(buzzonline.game_state.players[player.player_id].cards)[p]]
+      client_card[p] = '<div class="card side-card"><img src="/dist/img/cards/'+current_card.html+'"></div>'
+    }
+
+    btn_class = buzzonline.game_state.temp.btn_class
+    client_answer = buzzonline.game_state.temp.client_answer
+
+    view(result_host_file, {
       drink_amt: 1,
+      client_answer: `<button type="button" class="btn ${btn_class}">${client_answer}</button>`,
+      client_card_1: client_card[0],
+      client_card_2: client_card[1],
+      client_card_3: client_card[2],
       'card.img_src': card.html
     })
 
@@ -1550,11 +1577,18 @@ buzzonline.phase.evaluator = {}
 
 buzzonline.phase.evaluator.phase_1_1 = function(player_answer, correct_answer, player_cards = null){
     /* Phase 1.1: Player must choose Red or Black */
+    buzzonline.game_state.temp = {};
+    buzzonline.game_state.temp.btn_class = player_answer == "red" ? 'red' : 'btn-outlined'
+    buzzonline.game_state.temp.client_answer = player_answer == "red" ? 'Red' : 'Black'
+
     return player_answer === correct_answer
 }
 
 buzzonline.phase.evaluator.phase_1_2 = function(player_answer, correct_answer, player_cards) {
     /* Phase 1.2: Player must choose if the provided card is higher or lower than their current card */
+    buzzonline.game_state.temp.btn_class = "btn-primary"
+    buzzonline.game_state.temp.client_answer = player_answer == "higher" ? 'Higher &#x25B2;' : 'Lower &#x25BC;'
+
     var player_card = parseInt(Object.values(player_cards)[0].value)
     var correct_answer = parseInt(correct_answer)
     return (
@@ -1566,6 +1600,9 @@ buzzonline.phase.evaluator.phase_1_2 = function(player_answer, correct_answer, p
 buzzonline.phase.evaluator.phase_1_3 = function(player_answer, correct_answer, player_cards) {
     /* Phase 1.3: Player must choose if the provided card 
     has a value inside or outside the values of their current card */
+    buzzonline.game_state.temp.btn_class = "btn-primary"
+    buzzonline.game_state.temp.client_answer = player_answer == "inside" ? 'Inbetween &#x21CB;' : 'Outside &#x21CC;'
+
     correct_answer = parseInt(correct_answer)
     let current_values = []
 
@@ -1589,6 +1626,8 @@ buzzonline.phase.evaluator.phase_1_3 = function(player_answer, correct_answer, p
 
 buzzonline.phase.evaluator.phase_1_4 = function(player_answer, correct_answer, player_cards) {
     /* Phase 1.4: Player must choose if the suit of the provided card is already in their hand */
+    buzzonline.game_state.temp.btn_class = player_answer ? "btn-primary" : "btn-outlined"
+    buzzonline.game_state.temp.client_answer = player_answer ? 'Yes' : 'No'
 
     var current_suits = []
 
@@ -1823,5 +1862,39 @@ function generate(amt) {
  */
  
 if(window.self === window.top) {
+  setTimeout(() => {
+    view('host_wrong_answer', {
+      'card.img_src': 'buzzonline__playingcard_C10.png',
+      'client_card_1': `<div class="card side-card"><img src="/dist/img/cards/buzzonline__playingcard_D4.png"></div>`,
+      'client_card_2': `<div class="card side-card"><img src="/dist/img/cards/buzzonline__playingcard_D4.png"></div>`,
+      'client_card_3': `<div class="card side-card"><img src="/dist/img/cards/buzzonline__playingcard_D4.png"></div>`,
+      'client_answer': `<button type="button" class="btn btn-primary">Inbetween &#x21CB;</button>`
+    })
+  }, 500)
 
+  view('component_player_tag', {
+    _inject: '#bo_playerDrawer',
+    _append: true,
+    'player.id': 0,
+    'player.profile_picture': '/dist/img/default_pp.png',
+    'player.name': 'Guest 1',
+    'player.drink_amount': Math.floor(Math.random() * 37)
+  })
+  view('component_player_tag', {
+    _inject: '#bo_playerDrawer',
+    _append: true,
+    'player.id': 0,
+    'player.active': 'active',
+    'player.profile_picture': '/dist/img/default_pp.png',
+    'player.name': 'Guest 1',
+    'player.drink_amount': Math.floor(Math.random() * 37)
+  })
+  view('component_player_tag', {
+    _inject: '#bo_playerDrawer',
+    _append: true,
+    'player.id': 0,
+    'player.profile_picture': '/dist/img/default_pp.png',
+    'player.name': 'Guest 1',
+    'player.drink_amount': Math.floor(Math.random() * 37)
+  })
 }

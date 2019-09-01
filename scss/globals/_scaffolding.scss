@@ -10,14 +10,12 @@
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow: hidden;
 }
-
-
 
 // ----------------------------------
 //          Page scaffolding
 // ----------------------------------
-
 
 html,
 body {
@@ -41,7 +39,7 @@ body {
     z-index: 0;
     font-size: 3rem;
     font-weight: $font-extrabold;
-    color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.03);
     text-shadow: 0px 0px;
     position: fixed;
     bottom: 80px;
@@ -87,44 +85,56 @@ body {
 
 .container {
     display: block;
-    @include screen-size(mobile) {
-        height: $mobile-container-height;
-    }
-
     padding: $container-padding $container-padding-side;
-    @include screen-size(large) {
-        overflow: hidden;
-        height: $container-height;
-    }
-    &.smaller {
-        height: $container-height-smaller;    
-    }
-
     opacity: 1;
     transition-duration: 75ms;
     &.fadeout {
         opacity: 0;
-    } 
+    }
+
+    @include screen-size(large) {
+        overflow: hidden;
+        height: $container-height;
+    }
+    @include screen-size(mobile) {
+        height: $mobile-container-height;
+    }
+    @include screen-size(xsmall) {
+        height: $mobile-container-height-xsmall;
+        padding: $container-padding $container-padding-side-xsmall $container-padding-xsmall;    
+    }
+    &.smaller {
+        height: $container-height-smaller;    
+    }
+    &.full-height {
+        height: calc(100% - 2 * #{$container-padding-side});
+        @include screen-size(xsmall) {
+            height: calc(100% - 2 * #{$container-padding-side-xsmall});
+        }
+        display: flex;
+    }
 }
 
 .banner-container {
     display: flex;
-    height: 10%;
+    height: 15%;
+    width: 100%;
     align-items: center;
     justify-content: center;
     position: absolute;
-    top: 40px;
+    top: 20px;
+    z-index: 2;
     .panel {
         width: 80%;
         height: 120px;
         max-height: 100%;
-
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
-
 }
 // ----------------------------------
 // Color scaffolding
 // ----------------------------------
+
 .red {
     background-color: $color-red;
 }

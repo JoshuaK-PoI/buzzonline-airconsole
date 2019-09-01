@@ -1,0 +1,93 @@
+
+// --------------------------
+//     Notice panel
+// --------------------------
+.notice-container {
+    position: absolute;
+    width: 100%;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    @include screen-size(mobile) {
+        align-items: center;
+        bottom: 64px;
+    }
+    flex-direction: column;
+    pointer-events: none;
+    .notice-panel {
+        min-width: 20%;
+        max-width: 50%;
+        margin: 5px;
+        border-radius: $border-radius-standard;
+        padding: 20px;
+        box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
+        @include screen-size(mobile) {
+            max-width: 95%;
+            padding: 0 0 0 10px;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 4px 4px 16px rgba(255, 255, 255, 0.1);
+            min-height: 48px;
+        }
+        transition-duration: 1s;
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        z-index: 2;
+        animation: not_fadein 0.3s forwards ease-out;
+        span {
+            @include font($font-bold, $color-text-inverted);
+            font-family: 'Nunito', sans-serif;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+            font-size: 1.2rem;
+            @include screen-size(mobile) {
+                font-size: 1.2rem;
+                margin-right: 10px;
+            }
+            text-align: center;
+            letter-spacing: .03rem;
+            strong {
+                @include font($font-extrabold, $color-text-inverted);
+            }
+            img {
+                max-width: 16px;
+                max-height: 16px;
+            }
+            .btn {
+                display: inline;
+                box-shadow: -1px 0px 4px rgba(0, 0, 0, 0.2);
+                pointer-events: auto;
+            }
+        }
+        &.fadeout {
+            animation: not_fadeout 0.3s forwards ease-in;
+        }
+    }
+}
+
+@keyframes not_fadein {
+    0% {
+        transform: translateY(10px) scaleY(0.8);
+        opacity: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    100% {
+        transform: translateY(0) scaleY(1);
+        opacity: 1;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+}
+
+@keyframes not_fadeout {
+    0% {
+        transform: translateY(0) scaleY(1);
+        opacity: 1;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    100% {
+        transform: translateY(-10px) scaleY(0.8);
+        opacity: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+}

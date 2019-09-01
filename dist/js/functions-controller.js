@@ -30,8 +30,11 @@ __master.load = function() {
     })
 
     ac.on('VIEW_UPDATE', function (device_id, params, context) {
-        if(!local.spectator || params.__ignore_master_spectator)
+        if(!local.spectator || params.__ignore_master_spectator) {
+            if(document.querySelector('.full-height'))
+                document.querySelector('.full-height').classList.remove('full-height');
             view(params._filename, params);
+        }
     })
 
     ac.on('VIEW_UPDATE_ADDCARD', function (device_id, params, context) {
@@ -42,6 +45,14 @@ __master.load = function() {
     ac.on('VIEW_UPDATE_REMOVE', function (device_id, params, context) {
         if(!local.spectator)
             removeFromView(params._element);
+    })
+    
+    ac.on('UPDATE_DRINK_AMT', function(device_id, params) {
+        if(!local.spectator) {
+            document.querySelector('#player_drink_amt').innerHTML = params.drinks;
+            document.querySelector('#player_drink_icon').classList.add('drink-animation')
+            setTimeout(() => {document.querySelector('#player_drink_icon').classList.remove('drink-animation')}, 1000)
+        }
     })
 
     ac.on('PLAYER_SHOW_CARD_DRAWER', function(device_id) {
@@ -112,7 +123,8 @@ __master.load = function() {
         const cards = document.querySelectorAll('.bo-client-cards .card');
 
         /* First, clean out the view */
-        document.querySelector('.bo-client-container').innerHTML = '';
+        document.querySelector('.bo-client-container').classList.add('full-height');
+        document.querySelector('.bo-client-container').innerHTML = '<div class="card-container"></div>';
         /* Disable clicking on the view to prevent cards turning over prematurely */
         document.querySelector('.bo-client-container').style.pointerEvents = 'none';
         
@@ -135,7 +147,7 @@ __master.load = function() {
         /* Add the cards to the view (Add also the back of the card to hide the card) */
         for(o in output_cards) {
             if(output_cards[o]){
-                document.querySelector('.bo-client-container').insertAdjacentElement('beforeend', output_cards[o]);
+                document.querySelector('.card-container').insertAdjacentElement('beforeend', output_cards[o]);
                 document.querySelector(`[data-card-rank='${output_cards[o].dataset.cardRank}']`)
                 .insertAdjacentHTML('beforeend', '<img src="/dist/img/cards/buzzonline__playingcard_back.png" class="placeholder-card hidden">');
             }
@@ -160,6 +172,14 @@ __master.load = function() {
             }, params.timeout)
         }
     })
+
+    // Set the nickname in the status bar
+    ac.onReady = function() {
+        document.querySelector('#player_nickname').innerHTML = ac.getNickname(ac.getDeviceId());
+        ac.onDeviceProfileChange = function(){
+            document.querySelector('#player_nickname').innerHTML = ac.getNickname(ac.getDeviceId());
+        }
+    }
 }
 
 function testMsg() {

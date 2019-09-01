@@ -25,22 +25,37 @@ h6 {
 // Define sizes:
 h1 { font-size: 3rem;   }
 h2 { font-size: 2.5rem; }
-h3 { font-size: 2rem;   }
-h4 { font-size: 1.8rem; }
-h5 { font-size: 1.3rem; }
+h3 { font-size: 2.3rem; }
+h4 { font-size: 2rem;   }
+h5 { font-size: 1.5rem; }
 h6 { font-size: 1rem;   }
+
+// Smaller text sizes for smallest screens
+@include screen-size(xsmall) {
+    h1 { font-size: 2.3rem; }
+    h2 { font-size: 2rem;   }
+    h3 { font-size: 1.7rem; }
+    h4 { font-size: 1.5rem; }
+    h5 { font-size: 1.3rem; }
+    h6 { font-size: 1rem;   }    
+}
 
 // -----------
 // Text styles
 // -----------
 
-h1, h2 {
-    font-family: Nunito, sans-serif;
+h1, 
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Nunito', sans-serif;
 }
 
 strong {
     font-family: inherit;
-    font-weight: $font-bold;
+    font-weight: $font-extrabold;
 }
 
 .text-bold {

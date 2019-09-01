@@ -37,3 +37,39 @@
         top: 20%;
     }
 }
+
+.bo-player-status-bar {
+    position: absolute;
+    height: 35px;
+    width: 100%;
+    background-color: #000;
+    display: flex;
+    & > div {
+        width: calc(50% - 25px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap;
+        .text {
+            font-family: 'Nunito', sans-serif;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        img {
+            max-width: 16px;
+            margin-right: 5px;
+        }
+    }
+    .bo-player-status-bar--user {
+        padding: 0px 20px 0px 5px;
+    }
+    .bo-player-status-bar--drinks {
+        padding: 0px 5px 0px 20px;
+    }
+}
+
+@include screen-size(mobile) {
+    .jumbotron, #_question {
+        margin-top: 20px;
+    }
+}
