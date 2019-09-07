@@ -268,7 +268,7 @@ buzzonline.deviceSendStart = function(device_id) {
 buzzonline.deviceDisconnectionHandler = function(device_id) {
   /* Get the player ID from the manifest */
   var player = null;
-  if(Object.entries(buzzonline.game_state.players).length ) {
+  if(Object.entries(buzzonline.game_state.players).length && buzzonline.game_state.in_progress) {
     for(p of Object.keys(buzzonline.game_state.players)) {
       if(buzzonline.game_state.players[p].device_id == device_id) {
         /* Found player */
@@ -288,28 +288,27 @@ buzzonline.deviceDisconnectionHandler = function(device_id) {
       case 2:
         break;
       case 3:
-        if(buzzonline.game_state.current_player = player.player_id) {
+        if(buzzonline.game_state.current_player = player.player_id)
           buzzonline.phase.resetGame()
-        }
         break;
     }
+    if(player && player.player_id && buzzonline.game_state.players[player.player_id]) {
+      /* Remove player from the game data */
+      delete buzzonline.game_state.players[player.player_id]
 
-    /* Remove player from the game data */
-    delete buzzonline.game_state.players[player.player_id]
-
-    /* Remove the player from the manifest if they leave in an active game. 
-    Cards in their hand become inaccessible. */
-    delete buzzonline.game_state.manifest[player.player_id]
+      /* Remove the player from the manifest if they leave in an active game. 
+      Cards in their hand become inaccessible. */
+      delete buzzonline.game_state.manifest[player.player_id]
+    }
     setTimeout(function(){
       /* Reset all player IDs */
       buzzonline.setPlayers(check_for_no_player_id = true)
-    }, 200)
-    
+    }, 200)  
   }
+
   /* Do we need to elect a new gamemaster? (The game has not started yet) */
-  if(device_id == buzzonline.game_state.game_master_device_id) {
-    buzzonline.setGameMaster(ac.getMasterControllerDeviceId())
-  }
+  if(device_id == buzzonline.game_state.game_master_device_id)
+    buzzonline.setGameMaster(ac.getMasterControllerDeviceId(), update = true)
 
   /* Remove player from the screen */
   // eslint-disable-next-line no-undef
@@ -360,6 +359,30 @@ buzzonline.function.startGame = function(device_id, params) {
   if(device_id === ac.getMasterControllerDeviceId() ||
      device_id === buzzonline.game_state.game_master_device_id) {
     
+    
+
+    /* Connect all players to the game */
+    buzzonline.setPlayers()
+
+    /* Re-check the master controller */
+    if(device_id !== ac.getMasterControllerDeviceId())
+      buzzonline.setGameMaster(ac.getMasterControllerDeviceId(), true)
+
+    /* Check the amount of players in the game.
+       The game can only start with more than 2 or less than 10 players.
+    */
+    if(ac.getActivePlayerDeviceIds().length < 3 || ac.getActivePlayerDeviceIds().length > 9) {
+      var message = ac.getActivePlayerDeviceIds().length < 3 ?
+        `Too few players to start the game! You need at least 3 players to start this game.` :
+        `Too many players to start the game! You can have no more than 9 players in a game.`
+      buzzonline.notice({
+        notice_id: generate(6),
+        message: message
+      })
+      return
+    }
+    
+    /* Send the leader to all devices */
     buzzonline.game_state.in_progress = true
     ac.broadcastEvent('JOIN_GAME')
     setTimeout(() => {
@@ -367,16 +390,12 @@ buzzonline.function.startGame = function(device_id, params) {
         _filename: 'start_game_leader'
       })
     }, 500)
+
     view('start_game_leader')
     buzzonline.function.prepareTimer()
+    
     buzzonline.function.activateTimer(3, () => {
-      /* Connect all players to the game */
-      buzzonline.setPlayers()
-
-      /* Re-check the master controller */
-      if(device_id !== ac.getMasterControllerDeviceId())
-        buzzonline.setGameMaster(ac.getMasterControllerDeviceId(), true)
-
+    
       /* Generate a new deck of cards */
       buzzonline.game_state.card_stack = cardStack.generate(false)
 
