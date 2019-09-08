@@ -108,6 +108,12 @@ var preloader = {};
 var image_bank = {};
 
 /**
+ * Sound bank
+ * Pull sounds from here.
+ */
+var sound_bank = {};
+
+/**
  * Number of assets to load
  */
 preloader.to_load = 0;
@@ -148,28 +154,69 @@ preloader.onloaded = function() {
  * Assumes root directory is `/dist/img/`
  * 
  * @param {Array} images All images to be preloaded
+ * @param {Array} soundfiles All sound files to be preloaded
  */
-preloader.loadImages = function(images) {
+preloader.load = function(images, soundfiles) {
     preloader.to_load = images.length;
 
     for(i in images) {
-        let current_image = images[i];
-        let image = new Image();
+      let current_image = images[i];
+      let image = new Image();
 
-        image.src = `/dist/img/${current_image}`;
+      image.src = `/dist/img/${current_image}`;
 
-        /* Check when the image is done loading */
-        image.onload = function() {
-            preloader.loaded++;
-            document.querySelector('.loader-progress--bar').style.width = (100 * (preloader.loaded / preloader.to_load)) + '%';
-            document.querySelector('.loader-text').innerHTML = `Loading... ${preloader.loaded}/${preloader.to_load}`;
-            image_bank += image;
+      /* Check when the image is done loading */
+      image.onload = function() {
+          preloader.loaded++;
+          document.querySelector('.loader-progress--bar').style.width = (100 * (preloader.loaded / preloader.to_load)) + '%';
+          document.querySelector('.loader-text').innerHTML = `Loading... ${preloader.loaded}/${preloader.to_load}`;
+          image_bank += image;
+          if(typeof buzzonline_audio == "undefined") {
             if(preloader.loaded == preloader.to_load)
                 preloader.onloaded();
-        }
+          }
+      }
+    }
+    if(soundfiles && typeof buzzonline_audio !== "undefined") {
+      preloader.to_load += soundfiles.length;
+      buzzonline_audio.init();
+      for(s in soundfiles) {
+        audio_load(soundfiles[s]);
+      }
     }
 }
 
+function audio_load(current_audio) {
+  var request = new XMLHttpRequest();
+  request.open('GET', `dist/audio/${current_audio}`, true);
+  request.responseType = 'arraybuffer';
+  request.onprogress = function(e) {
+    document.querySelector('.loader-text').innerHTML = `Loading... ${preloader.loaded}/${preloader.to_load} [${current_audio} ${(e.loaded / 1000000).toFixed(1)}/${Math.fround(e.total / 1000000).toFixed(1)}M]`;
+  }
+  request.onreadystatechange = function(params) {
+    if(request.readyState == 4 && request.status == 200) {
+      if(!request.response) {
+        console.error('Audio ' + current_audio + ' has no response object');
+        return;
+      }
+
+      buzzonline_audio.context.decodeAudioData(request.response, function(buffer){
+        preloader.loaded++;
+        document.querySelector('.loader-progress--bar').style.width = (100 * (preloader.loaded / preloader.to_load)) + '%';
+        document.querySelector('.loader-text').innerHTML = `Loading... ${preloader.loaded}/${preloader.to_load}`;
+        buzzonline_audio.buffer[current_audio] = buffer;
+        if(preloader.loaded == preloader.to_load) {
+          preloader.onloaded();
+          //Start the music loop
+          buzzonline_audio.play("bgmusic", true);
+        }
+        return;
+      })
+      return;
+    }
+  }
+  request.send();
+}
 window.onload = function() {
     /**
      * Disable any screen input while the document is loading
@@ -182,9 +229,9 @@ window.onload = function() {
     document.querySelector('.loader-container').classList.remove('hidden');
 
     /**
-     * Preload images
+     * Preload assets
      */
-    preloader.loadImages([
+    preloader.load([
         "buzzonline-Logo4x.png",
         "cards/buzzonline__playingcard_back.png",
         "cards/buzzonline__playingcard_C2.png",
@@ -239,5 +286,13 @@ window.onload = function() {
         "cards/buzzonline__playingcard_S12.png",
         "cards/buzzonline__playingcard_S13.png",
         "cards/buzzonline__playingcard_S14.png"
+    ], [
+      "playercorrect.wav",
+      "assignplayer.wav",
+      "completedistribution.wav",
+      "playermissed.wav",
+      "playerwrong.wav",
+      "startdistribution.wav",
+      "bgmusic.wav"
     ])
 }

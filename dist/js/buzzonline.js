@@ -288,7 +288,7 @@ buzzonline.deviceDisconnectionHandler = function(device_id) {
       case 2:
         break;
       case 3:
-        if(buzzonline.game_state.current_player = player.player_id)
+        if(buzzonline.game_state.current_player == player.player_id)
           buzzonline.phase.resetGame()
         break;
     }
@@ -359,7 +359,9 @@ buzzonline.function.startGame = function(device_id, params) {
   if(device_id === ac.getMasterControllerDeviceId() ||
      device_id === buzzonline.game_state.game_master_device_id) {
     
-    
+    /**
+     * TEST: Start the audio engine and load a test sound
+     */
 
     /* Connect all players to the game */
     buzzonline.setPlayers()
@@ -539,6 +541,8 @@ buzzonline.function.distributeUpdate = function(device_id, params) {
 
   buzzonline.drink(params.distributee_id, buzzonline.playfield.getDrinkAmt())
 
+  buzzonline_audio.play("assignplayer")
+
   clearTimeout(__master[`global_timeout_${params.distribution_id}`])
   __master[`global_timeout_${params.distribution_id}`] = setTimeout(() => {
     buzzonline.function.distributeAcknowledge(distributee.device_id, {
@@ -560,6 +564,8 @@ buzzonline.function.distributeAcknowledge = function(device_id, params) {
       document.querySelector(`#distribution_${params.distribution_id}`).remove();
       buzzonline.phase.phase_2.acknowledgeDistribution();
     }, 2000)
+
+    buzzonline_audio.play("completedistribution")
 }
 
 buzzonline.setPlayers = function(from_disconnection = false) {
@@ -949,6 +955,8 @@ buzzonline.phase.phase_2.distribute = function(args) {
   //Remove the card from the players' gamestate
   delete buzzonline.game_state.manifest[args.distributor.player_id].cards[args.distributor_card]
 
+  buzzonline_audio.play("startdistribution")
+
   // Start a timer for the distributor to choose a player. If they don't choose anyone within 10 seconds, choose for them.
   __master[`global_timeout_${distribution_id}`] = setTimeout(() => {
     var random_player = buzzonline.game_state.manifest[
@@ -1306,6 +1314,7 @@ buzzonline.phase.phase_3.evaluate = function(player, answer) {
       color: 'green',
       text: `Correct! Moving on...`
     })
+    buzzonline_audio.play("playercorrect")
   } else {
     /* Guessed wrong, penalize and move to row 1 */
     ac.sendEvent(player.device_id, 'VIEW_UPDATE', {
@@ -1324,6 +1333,7 @@ buzzonline.phase.phase_3.evaluate = function(player, answer) {
 
     /* Reset row */
     buzzonline.game_state.current_row = 1
+    buzzonline_audio.play("playerwrong")
   }
 
   setTimeout(() => {
@@ -1404,9 +1414,11 @@ buzzonline.controllerInteraction.initHandler = function(){
       buzzonline.phase.phase_3.evaluate(player, params.query)
       return
     }
+
     /* Show the clent's card drawer in phase 1_1 */
     if(buzzonline.game_state.phase == 1 && buzzonline.game_state.sub_phase == 1)
       ac.sendEvent(device_id, 'PLAYER_SHOW_CARD_DRAWER')
+
     manifest_key = Object.keys(buzzonline.game_state.manifest)[buzzonline.game_state.current_player]
     if(buzzonline.game_state.manifest[manifest_key].device_id !== device_id) {
       console.warn(`Wrong player answered; expected answer from device 
@@ -1425,10 +1437,12 @@ buzzonline.controllerInteraction.initHandler = function(){
     if(result) {
       result_file = 'client_right_answer'
       result_host_file = 'host_right_answer'
+      buzzonline_audio.play("playercorrect")
     } else {
       result_file = 'client_wrong_answer'
       result_host_file = 'host_wrong_answer'
       buzzonline.drink(getPlayer(device_id))
+      buzzonline_audio.play("playerwrong")
     }
 
     ac.sendEvent(device_id, 'VIEW_UPDATE_ADDCARD', {
@@ -1505,6 +1519,7 @@ buzzonline.controllerInteraction.initHandler = function(){
         device_id: device_id,
         message: `Wrong card &raquo; <img src="dist/img/beer_mono.png"> 1`
       })
+      buzzonline_audio.play("playermissed")
     } else {
       // Distribute the drink to another player
       buzzonline.phase.phase_2.distribute({
@@ -1871,6 +1886,54 @@ function generate(amt) {
   }
   return result;
 }
+
+/**
+ * HARDWARE FUNCTIONS
+ */
+
+var buzzonline_audio = {};
+
+/**
+ * Initializing function for Audio context.
+ * 
+ * This function will get called by the preloader.
+ * 
+ * @return {Boolean}
+ */
+buzzonline_audio.init = function() {
+  try {
+    if(!buzzonline_audio.initialized) {
+      buzzonline_audio.initialized = true;
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      buzzonline_audio.context = new AudioContext();
+      buzzonline_audio.context.gain = buzzonline_audio.context.createGain();
+      buzzonline_audio.buffer = [];
+    }
+  } catch (e) {
+    console.error("Could not instantiate audio engine. Audio is not supported.");
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Play a soundfile
+ * 
+ * @param {String} soundfile The name of the soundfile (Has to be preloaded in the preloader)
+ * @param {Boolean} repeat If true, the soundfile will loop when it reaches the end.
+ */
+buzzonline_audio.play = function(soundfile, repeat = false, gain = 0.2) {
+  var source = buzzonline_audio.context.createBufferSource();
+  source.buffer = buzzonline_audio.buffer[`${soundfile}.wav`];
+  source.connect(buzzonline_audio.context.gain);
+  buzzonline_audio.context.gain.connect(buzzonline_audio.context.destination);
+  if(repeat)
+    source.loop = true;
+
+    buzzonline_audio.context.gain.gain.setValueAtTime(gain, buzzonline_audio.context.currentTime)
+
+  source.start(0);
+}
 /**
  * 
  * 
@@ -1881,39 +1944,5 @@ function generate(amt) {
  */
  
 if(window.self === window.top) {
-  setTimeout(() => {
-    view('host_wrong_answer', {
-      'card.img_src': 'buzzonline__playingcard_C10.png',
-      'client_card_1': `<div class="card side-card"><img src="/dist/img/cards/buzzonline__playingcard_D4.png"></div>`,
-      'client_card_2': `<div class="card side-card"><img src="/dist/img/cards/buzzonline__playingcard_D4.png"></div>`,
-      'client_card_3': `<div class="card side-card"><img src="/dist/img/cards/buzzonline__playingcard_D4.png"></div>`,
-      'client_answer': `<button type="button" class="btn btn-primary">Inbetween &#x21CB;</button>`
-    })
-  }, 500)
-
-  view('component_player_tag', {
-    _inject: '#bo_playerDrawer',
-    _append: true,
-    'player.id': 0,
-    'player.profile_picture': '/dist/img/default_pp.png',
-    'player.name': 'Guest 1',
-    'player.drink_amount': Math.floor(Math.random() * 37)
-  })
-  view('component_player_tag', {
-    _inject: '#bo_playerDrawer',
-    _append: true,
-    'player.id': 0,
-    'player.active': 'active',
-    'player.profile_picture': '/dist/img/default_pp.png',
-    'player.name': 'Guest 1',
-    'player.drink_amount': Math.floor(Math.random() * 37)
-  })
-  view('component_player_tag', {
-    _inject: '#bo_playerDrawer',
-    _append: true,
-    'player.id': 0,
-    'player.profile_picture': '/dist/img/default_pp.png',
-    'player.name': 'Guest 1',
-    'player.drink_amount': Math.floor(Math.random() * 37)
-  })
+  
 }
