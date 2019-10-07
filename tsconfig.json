@@ -1,7 +1,12 @@
 {
     "compilerOptions": {
-        "target": "es3",
+        "outDir": "./dist/js",
+        "sourceMap": true,
+        "target": "es5",
         "watch": true,
-        "lib": ["dom", "es2017"]
+        "lib": ["dom", "es2017"],
+        "downlevelIteration": true,
+        "module": "commonjs",
+        "allowJs": true
     }
 }
