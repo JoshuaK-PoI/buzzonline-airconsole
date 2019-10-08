@@ -8,7 +8,7 @@ export default class Cards {
      * Generates a new shuffled deck of cards
      *
      * @param {boolean} [jokers=false] Add Jokers to the deck. Default `false`.
-     * @returns {Card[]}
+     * @returns {Card[]} cardStack: `Card[]`
      * @memberof Cards
      */
     public generate(jokers: boolean = false): Card[] {

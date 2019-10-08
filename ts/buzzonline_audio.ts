@@ -15,9 +15,9 @@ export default class Audio {
 
     public async preload(file: string) {
         var response: ArrayBuffer = await new Http().fetch({
-            method: 'GET',
-            uri: '',
-            responseType: "arraybuffer"
+            method: _v.METH_GET,
+            uri: '', //!TODO
+            responseType: _v.RETY_ARRAYBUFFER
         }).catch((reason) => {
             console.error(reason);
             return;
@@ -38,11 +38,8 @@ export default class Audio {
         source.connect(this._audioGain);
         this._audioGain.connect(this._audioContext.destination);
         this._audioGain.gain.setValueAtTime(gain, this._audioContext.currentTime);
-
-        if(repeat)
-            source.loop = true;
+        source.loop = repeat;
 
         source.start(0);
     }
-
 }

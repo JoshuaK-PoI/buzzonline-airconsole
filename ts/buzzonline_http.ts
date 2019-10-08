@@ -1,8 +1,5 @@
-interface HttpOptions {
-    method:         string;
-    uri:            string;
-    responseType:   XMLHttpRequestResponseType;
-}
+import { HttpOptions } from "./buzzonline_interfaces";
+
 export default class Http {
     constructor() {
 
