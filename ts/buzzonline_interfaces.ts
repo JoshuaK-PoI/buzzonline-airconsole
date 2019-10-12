@@ -83,3 +83,48 @@ export interface Card {
 export interface Distribution {
 
 }
+
+/**
+ * Options for the HTTP XHR request
+ * 
+ * @param {string}                      method          The HTTP method to use ('GET', 'POST', 'PUT', etc.)
+ * @param {string}                      uri             The Request URI
+ * @param {XMLHttpRequestResponseType}  responseType    The type of response expected ('text', 'arraybuffer', 'blob', 'document', 'json')
+ * 
+ * @interface HttpOptions
+ */
+export interface HttpOptions {
+    method:         string;
+    uri:            string;
+    responseType:   XMLHttpRequestResponseType;
+}
+
+/**
+ * Options for the Screen Handler
+ * 
+ * @param {string}                      file    The file to be fetched. Placed in the dist/templates folder of this project, access them with only their filename (no extension at the end)
+ * @param {ScreenHandlerOptionsParams}  params  Optional parameters for the screen handler
+ */
+export interface ScreenHandlerOptions {
+    file:           string;
+    params:         ScreenHandlerOptionsParams;
+}
+
+/**
+ * Parameters for the screen handler
+ * 
+ * @param {string}  _inject         Specify the element where the content should be placed. If left blank, the content will be placed at the root of the DOM (Default #bo_container)
+ * @param {string}  _content        The content to be replaced on the template.
+ * @param {boolean} _append         If true, the content will be appended to the DOM instead of overwriting the content already placed at the target.
+ * @param {boolean} _no_fadeout     Don't fade out the content before placing the new content.
+ * @param {boolean} _enlarge_view   Removes the padding around the main container to allow for more screen use.
+ * @param {boolean} _restore_view   Resets the padding around the main container.
+ */
+export interface ScreenHandlerOptionsParams {
+    _inject:        string;
+    _content:       string;
+    _append:        boolean;
+    _no_fadeout:    boolean;
+    _enlarge_view:  boolean;
+    _restore_view:  boolean;
+}

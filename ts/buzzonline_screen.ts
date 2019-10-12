@@ -1,24 +1,7 @@
-interface ScreenHandlerOptions {
-    file: string;
-    params: ScreenHandlerOptionsParams;
-}
-
-interface ScreenHandlerOptionsParams {
-    _inject:        string;
-    _content:       string;
-    _append:        boolean;
-    _no_fadeout:    boolean;
-    _enlarge_view:  boolean;
-    _restore_view:  boolean;
-}
-
 import Http from "./buzzonline_http";
+import { ScreenHandlerOptions } from "./buzzonline_interfaces";
 
 export default class ScreenHandler {
-    constructor() {
-
-    }
-
     async show(options: ScreenHandlerOptions) {
         if(typeof(options.file) !== "undefined") {
             const template = await new Http().fetch({
