@@ -1,10 +1,6 @@
 import { HttpOptions } from "./buzzonline_interfaces";
 
 export default class Http {
-    constructor() {
-
-    }
-
     public async fetch(options: HttpOptions): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             const xhr = new XMLHttpRequest();

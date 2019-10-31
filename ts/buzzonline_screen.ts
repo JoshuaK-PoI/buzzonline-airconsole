@@ -1,12 +1,7 @@
-import { ScreenHandlerOptions, ScreenHandlerOptionsParams } from "./buzzonline_interfaces";
-import * as _v from "./buzzonline_vars";
 import Http from "./buzzonline_http";
+import { ScreenHandlerOptions } from "./buzzonline_interfaces";
 
 export default class ScreenHandler {
-    constructor() {
-
-    }
-
     async show(options: ScreenHandlerOptions) {
         if(typeof(options.file) !== "undefined") {
             const template = await new Http().fetch({

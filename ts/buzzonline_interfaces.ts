@@ -102,12 +102,25 @@ export interface Distribution {
 }
 
 /**
- * Options for the Screen handler
- *
- * @param {string}                      file    The name of the file to fetch.
- * @param {ScreenHandlerOptionsParams}  params  The Screen handler's parameters
- *
- * @interface ScreenHandlerOptions
+ * Options for the HTTP XHR request
+ * 
+ * @param {string}                      method          The HTTP method to use ('GET', 'POST', 'PUT', etc.)
+ * @param {string}                      uri             The Request URI
+ * @param {XMLHttpRequestResponseType}  responseType    The type of response expected ('text', 'arraybuffer', 'blob', 'document', 'json')
+ * 
+ * @interface HttpOptions
+ */
+export interface HttpOptions {
+    method:         string;
+    uri:            string;
+    responseType:   XMLHttpRequestResponseType;
+}
+
+/**
+ * Options for the Screen Handler
+ * 
+ * @param {string}                      file    The file to be fetched. Placed in the dist/templates folder of this project, access them with only their filename (no extension at the end)
+ * @param {ScreenHandlerOptionsParams}  params  Optional parameters for the screen handler
  */
 export interface ScreenHandlerOptions {
     file:           string;
@@ -115,38 +128,20 @@ export interface ScreenHandlerOptions {
 }
 
 /**
- * Parameters for the Screen handler
- *
- * @param {string}  _content        The content to display. Required if `_inject` is not defined.
- * @param {string}  _inject         Where on the screen the data should be injected. If left undefined, the screen handler will default to placing the content in the root viewport of the screen.
- * @param {boolean} _append         Append the content instead of overwriting the existing content.
- * @param {boolean} _no_fadeout     Don't fade out the screen when replacing the view content.
- * @param {boolean} _enlarge_view   Remove the viewport margins to maximize screen use.
- * @param {boolean} _restore_view   Restore the viewport margins if `_enlarge_view` was called previously.
- *
- * @interface ScreenHandlerOptionsParams
+ * Parameters for the screen handler
+ * 
+ * @param {string}  _inject         Specify the element where the content should be placed. If left blank, the content will be placed at the root of the DOM (Default #bo_container)
+ * @param {string}  _content        The content to be replaced on the template.
+ * @param {boolean} _append         If true, the content will be appended to the DOM instead of overwriting the content already placed at the target.
+ * @param {boolean} _no_fadeout     Don't fade out the content before placing the new content.
+ * @param {boolean} _enlarge_view   Removes the padding around the main container to allow for more screen use.
+ * @param {boolean} _restore_view   Resets the padding around the main container.
  */
 export interface ScreenHandlerOptionsParams {
-    _content?:      string;
-    _inject?:       string;
-    _append?:       boolean;
-    _no_fadeout?:   boolean;
-    _enlarge_view?: boolean;
-    _restore_view?: boolean;
-}
-
-/**
- * The HttpOptions interface
- * Used by XMLHttpRequests to provide a basic set of parameters.
- *
- * @param {string} method The HTTP method to use
- * @param {string} uri The URI to use
- * @param {XMLHttpResponseType} responseType The response type expected back
- *
- * @interface HttpOptions
- */
-export interface HttpOptions {
-    method:         string;
-    uri:            string;
-    responseType:   XMLHttpRequestResponseType;
+    _inject:        string;
+    _content:       string;
+    _append:        boolean;
+    _no_fadeout:    boolean;
+    _enlarge_view:  boolean;
+    _restore_view:  boolean;
 }

@@ -8,5 +8,8 @@
         "downlevelIteration": true,
         "module": "commonjs",
         "allowJs": true
-    }
+    },
+    "include": [
+        "node_modules/airconsole-typescript/airconsole-typescript.d.ts"
+    ]
 }
