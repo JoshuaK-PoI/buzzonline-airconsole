@@ -1,20 +1,21 @@
-import {iGameState, iCard, iDistribution, iPlayer, iShowdown} from "./buzzonline_interfaces";
+import {GameState, Card, Distribution, Player, Showdown} from "./buzzonline_interfaces";
 
-export default class GameState implements iGameState {
-    cardStack:      iCard[];
+export default class GameStateHandler implements GameState {
+    cardStack:      Card[];
     currentAnswer:  String;
     currentCard:    Number;
     currentPlayer:  Number;
     currentRow:     Number;
-    distributions:  iDistribution[];
+    distributions:  Distribution[];
     masterDeviceId: Number;
     masterNickname: String;
     phase:          Number;
-    players:        iPlayer[];
-    showdown:       iShowdown;
+    players:        Player[];
+    showdown:       Showdown;
     subPhase:       Number;
     rounds:         Number;
 
     constructor() {
+        
     }
 }

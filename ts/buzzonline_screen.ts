@@ -1,5 +1,6 @@
 import Http from "./buzzonline_http";
 import { ScreenHandlerOptions } from "./buzzonline_interfaces";
+import * as _v from "./buzzonline_vars";
 
 export default class ScreenHandler {
     async show(options: ScreenHandlerOptions) {

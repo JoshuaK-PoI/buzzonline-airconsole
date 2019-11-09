@@ -1,6 +1,6 @@
 /// <reference path="./buzzonline_master.ts" />
 
-import { iAirConsoleData } from "./buzzonline_interfaces";
+import { AirConsoleData } from "./buzzonline_interfaces";
 import ControllerFunctions from "./buzzonline_controller_functions";
 import functions           from "./buzzonline_functions";
 
@@ -17,7 +17,7 @@ export default class AirConsoleAdapter {
      * Starts the AirConsole Listening event handler.
      */
     public airConsoleStartListeners(): void {
-        airConsole.onMessage = (device_id: number, data: iAirConsoleData) => {
+        airConsole.onMessage = (device_id: number, data: AirConsoleData) => {
             switch(data.message_id) {
                 /**
                  * Controller-only functions
@@ -186,7 +186,7 @@ export class AirConsoleFunctions {
      * @param device_id The recipient's AirConsole Device ID
      * @param data The event name and accompanying parameters
      */
-    public send(device_id:number, data:iAirConsoleData): void {
+    public send(device_id: number, data: AirConsoleData): void {
         airConsole.message(device_id, data);
     }
 
@@ -194,7 +194,7 @@ export class AirConsoleFunctions {
      * Broadcast an event to all devices (except this one)
      * @param data The event name and accompanying parameters
      */
-    public broadcast(data:iAirConsoleData): void {
+    public broadcast(data: AirConsoleData): void {
         airConsole.message(undefined, data);
     }
 }

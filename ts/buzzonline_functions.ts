@@ -1,22 +1,17 @@
-import Http from "./buzzonline_http";
+import ScreenHandler from "./buzzonline_screen";
+import { ScreenHandlerOptions } from "./buzzonline_interfaces";
 
 export default class Functions {
     
     /**
      * View {View}
-     * Fetch a view file from the server
+     * Fetch and build view file from the server
      * 
      * 
-     * @param {T} params Parameters for the content 
+     * @param {ScreenHandlerOptions} params Parameters for the content 
      */
-    async v(params) {
-        let response = await new Http().fetch({
-            method: 'GET',
-            uri: `dist/templates/_${params.fileName}.html?_${new Date().getTime()}`,
-            responseType: 'document'
-        });
-
-        
+    async v(params: ScreenHandlerOptions) {
+        new ScreenHandler().show(params);
     }
 
     /**

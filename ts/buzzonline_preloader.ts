@@ -1,5 +1,5 @@
 import Audio from "./buzzonline_audio";
-import { iGameAssets } from "./buzzonline_interfaces";
+import { GameAssets } from "./buzzonline_interfaces";
 
 export default class Preloader {
     private _toLoad: number;
@@ -15,9 +15,9 @@ export default class Preloader {
      * @param images Array of image files. Specify location and file extension Root is `./dist/img/`.
      * @param sounds Array of sound files. Specify location, no file extension Root is `./dist/audio`.
      * 
-     * @returns {Promise<iGameAssets>} {audioBuffer, imageBuffer}
+     * @returns {Promise<GameAssets>} {audioBuffer, imageBuffer}
      */
-    public async load(images: Array<string>, sounds: Array<string>): Promise<iGameAssets> {
+    public async load(images: Array<string>, sounds: Array<string>): Promise<GameAssets> {
         this._toLoad = images.length + sounds.length;
         
         const audioBuffer = await this._loadSounds(sounds).catch((e) => {throw e});

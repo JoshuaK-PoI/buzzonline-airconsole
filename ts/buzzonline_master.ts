@@ -10,7 +10,7 @@ import Preloader    from "./buzzonline_preloader";
 import Audio        from "./buzzonline_audio";
 import * as _v      from "./buzzonline_vars";
 import GameState    from "./buzzonline_gamestatehandler";
-import { iGameData }from "./buzzonline_interfaces";
+import { GameData }from "./buzzonline_interfaces";
 
 /****
  * Global declarations
@@ -22,7 +22,7 @@ declare global {
      * 
      * Holds the game assets, as well as the current game state.
      */
-    var gameData: iGameData;
+    var gameData: GameData;
 
     /**
      * The global AirConsole object.
@@ -53,7 +53,7 @@ window.onload = (_e: Event) => {
 
 
 class BuzzOnline {
-    private _gameData: iGameData;
+    private _gameData: GameData;
     private _airConsole: AirConsole;
 
     constructor() {
