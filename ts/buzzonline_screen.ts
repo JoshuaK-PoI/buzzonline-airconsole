@@ -5,9 +5,9 @@ export default class ScreenHandler {
     async show(options: ScreenHandlerOptions) {
         if(typeof(options.file) !== "undefined") {
             const template = await new Http().fetch({
-                method: "GET",
+                method: _v.METH_GET,
                 uri: `dist/templates/_${options.file}.html?_${new Date().getTime()}`,
-                responseType: "text"
+                responseType: _v.RETY_TEXT
             });
 
             const res = this.buildTemplate(template, options.params)
@@ -20,7 +20,6 @@ export default class ScreenHandler {
 
             if (options.params._restore_view)
                 this._restoreView();
-
 
             if (options.params._append) {
                 document.querySelector(querySelector).insertAdjacentHTML('beforeend', res)

@@ -23,6 +23,11 @@ export const VALU_J:        number = 14;
 
 export const HTML_BOCARD:   string = "buzzonline__playingcard_";
 
+export const METH_GET:      string = 'GET';
+
+export const RETY_ARRAYBUFFER:     XMLHttpRequestResponseType = "arraybuffer";
+export const RETY_TEXT:     XMLHttpRequestResponseType = "text";
+
 /* Player Prompts */
 
 /* Console Prompts / Debugging */

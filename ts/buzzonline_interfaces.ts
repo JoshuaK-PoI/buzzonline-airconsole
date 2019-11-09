@@ -3,6 +3,19 @@
  *
  * Holds game data to be accessed and manipulated during a game.
  *
+ * @param {Card[]}          cardStack       The main deck of cards currently "inactive" (ie. not in players' hands or open on the table)
+ * @param {string}          currentAnswer   The answer expected from the player. Used in Phase 1.
+ * @param {number}          currentCard     Keeps track of the card we're on in Phase 2 Ranges from 0 to 14.
+ * @param {number}          currentPlayer   Keeps track of which player is actively playing in Phase 1, Phase Showdown and Phase 3.
+ * @param {number}          currentRow      Keeps track of which row we're on in Phase 3.
+ * @param {Distribution[]}  distributions   All active distributions of Phase 2.
+ * @param {number}          masterDeviceId  AirConsole's Device ID of the master controller.
+ * @param {string}          masterNickname  AirConsole's Nickname of the master controller.
+ * @param {number}          phase           The current active phase. 0 = inactive game, 1 = Phase 1 (Dealing), 2 = Phase 2 (Pyramid), 3 = Phase 3 (Buzz)
+ * @param {Player[]}        players         All active players and their information in the game.
+ * @param {Showdown}        showdown        Information object for the Showdown (Phase 2)
+ * @param {number}          subPhase        The current active sub-phase. Used in Phase 1 to specift which dealing round we're on.
+ *
  * @interface GameState
  */
 export interface iGameState {
@@ -23,8 +36,12 @@ export interface iGameState {
 
 /**
  * The Showdown Interface
- *
+ * @TODO: Verify information after building Showdown class methods
  * Holds information for the Showdown (after phase 2 of a round) if necessary.
+ * @param {string} answer The expected answer from the player
+ * @param {number} currentCard The current card
+ * @param {Player[]} manifest The players in the Showdown
+ * @param {Player[]} manifestRematch Players elected for a rematch (if the Showdown ended in a tie)
  *
  * @interface Showdown
  */

@@ -44,11 +44,8 @@ export default class Audio {
         source.connect(this._audioGain);
         this._audioGain.connect(this._audioContext.destination);
         this._audioGain.gain.setValueAtTime(gain, this._audioContext.currentTime);
-
-        if(repeat)
-            source.loop = true;
+        source.loop = repeat;
 
         source.start(0);
     }
-
 }
