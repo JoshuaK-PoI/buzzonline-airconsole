@@ -1,7 +1,13 @@
-import { HttpOptions } from "./buzzonline_interfaces";
+import { iHttpOptions } from "./buzzonline_interfaces";
 
 export default class Http {
-    public async fetch(options: HttpOptions): Promise<any> {
+
+    /**
+     * Fetches a file from the server
+     * 
+     * @param {iHttpOptions} options HTTP options: `responseType` {XMLHttpRequestResponseType}, `method` {string}, `uri`: {string}
+     */
+    public async fetch(options: iHttpOptions): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.responseType = options.responseType;

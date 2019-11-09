@@ -5,18 +5,18 @@
  *
  * @interface GameState
  */
-export interface GameState {
-    cardStack:      Card[];
+export interface iGameState {
+    cardStack:      iCard[];
     currentAnswer:  String;
     currentCard:    Number;
     currentPlayer:  Number;
     currentRow:     Number;
-    distributions:  Distribution[];
+    distributions:  iDistribution[];
     masterDeviceId: Number;
     masterNickname: String;
     phase:          Number;
-    players:        Player[];
-    showdown:       Showdown;
+    players:        iPlayer[];
+    showdown:       iShowdown;
     subPhase:       Number;
     rounds:         Number;
 }
@@ -28,11 +28,11 @@ export interface GameState {
  *
  * @interface Showdown
  */
-export interface Showdown {
+export interface iShowdown {
     answer:         String;
     currentCard:    Number;
-    manifest:       Player[];
-    manifestRematch:Player[];
+    manifest:       iPlayer[];
+    manifestRematch:iPlayer[];
 }
 
 /**
@@ -48,8 +48,8 @@ export interface Showdown {
  *
  * @interface Player
  */
-export interface Player {
-    cards:          Card[];
+export interface iPlayer {
+    cards:          iCard[];
     deviceId:       Number;
     drinkAmt:       Number;
     nickname:       String;
@@ -67,7 +67,7 @@ export interface Player {
  *
  * @interface Card
  */
-export interface Card {
+export interface iCard {
     color:          String;
     html:   	    String;
     rank:           Number;
@@ -80,7 +80,7 @@ export interface Card {
  *
  * @interface Distribution
  */
-export interface Distribution {
+export interface iDistribution {
 
 }
 
@@ -93,7 +93,7 @@ export interface Distribution {
  * 
  * @interface HttpOptions
  */
-export interface HttpOptions {
+export interface iHttpOptions {
     method:         string;
     uri:            string;
     responseType:   XMLHttpRequestResponseType;
@@ -105,9 +105,9 @@ export interface HttpOptions {
  * @param {string}                      file    The file to be fetched. Placed in the dist/templates folder of this project, access them with only their filename (no extension at the end)
  * @param {ScreenHandlerOptionsParams}  params  Optional parameters for the screen handler
  */
-export interface ScreenHandlerOptions {
+export interface iScreenHandlerOptions {
     file:           string;
-    params:         ScreenHandlerOptionsParams;
+    params:         iScreenHandlerOptionsParams;
 }
 
 /**
@@ -120,11 +120,49 @@ export interface ScreenHandlerOptions {
  * @param {boolean} _enlarge_view   Removes the padding around the main container to allow for more screen use.
  * @param {boolean} _restore_view   Resets the padding around the main container.
  */
-export interface ScreenHandlerOptionsParams {
+export interface iScreenHandlerOptionsParams {
     _inject:        string;
     _content:       string;
     _append:        boolean;
     _no_fadeout:    boolean;
     _enlarge_view:  boolean;
     _restore_view:  boolean;
+}
+
+
+/**
+ * Game data
+ * Holds assets for the game. Handled by master function.
+ * 
+ * @param {GameState} gameState All information of the current game state
+ * @param {GameAssets} assets All loaded assets in the game
+ */
+export interface iGameData {
+    gameState:      iGameState;
+    assets:         iGameAssets;
+}
+
+/**
+ * Game assets
+ * Holds assets for the game.
+ * 
+ * @param {HTMLImageElement[]} imageBuffer Array of HTMLImageElements
+ * @param {AudioBuffer[]} audioBuffer Array of AudioBuffers
+ */
+export interface iGameAssets {
+    imageBuffer:    HTMLImageElement[];
+    audioBuffer?:   AudioBuffer[];
+}
+
+
+/**
+ * AirConsole Standard Message construct
+ * Modeled after AirConsole's event-driven messaging system.
+ * 
+ * @param {string} message_id The identifier of the message.
+ * @param {object} params Optional parameters to attach to the message
+ */
+export interface iAirConsoleData {
+    message_id:     string;
+    params?:        object;
 }
