@@ -3,18 +3,41 @@ import { ScreenHandlerOptions } from "./buzzonline_interfaces";
 import * as _v from "./buzzonline_vars";
 
 export default class ScreenHandler {
-    async show(options: ScreenHandlerOptions) {
+
+    /**
+     * Show the requested view. To use all parameters, use the `show` function.
+     * 
+     * @param {string} file The name of the screen file
+     */
+    public view(file: string): void {
+        console.log("Showing " + file + "...");
+        this.show({
+            file: file,
+            params: {
+                _content:       "",
+                _append:        false,
+                _no_fadeout:    false,
+                _enlarge_view:  false,
+                _restore_view:  false
+            }
+        });
+    }
+
+    /**
+     * Show the requested view file with optional parameters
+     * 
+     * @param {ScreenHandlerOptions} options Screen handler options
+     */
+    async show(options: ScreenHandlerOptions): Promise<void> {
         if(typeof(options.file) !== "undefined") {
             const template = await new Http().fetch({
                 method: _v.METH_GET,
-                uri: `dist/templates/_${options.file}.html?_${new Date().getTime()}`,
+                uri: `./dist/templates/_${options.file}.html?_${new Date().getTime()}`,
                 responseType: _v.RETY_TEXT
             });
 
             const res = this.buildTemplate(template, options.params)
-            let querySelector = '#bo_viewport'
-            if (options.params._inject)
-                querySelector = options.params._inject
+            let querySelector = options.params._inject ?? '#bo_viewport';
 
             if (options.params._enlarge_view)
                 this._enlargeView();
@@ -38,19 +61,17 @@ export default class ScreenHandler {
                     document.querySelector(querySelector).innerHTML = res
                 }
             }
-          } else {
+        } else {
             // No file, assume _inject and _content in options.params:
-            if(typeof(options.params._inject) == 'undefined' || typeof(options.params._content) == 'undefined') {
-              throw new TypeError('Missing data for content replacement!')
-            }
+            if(typeof(options.params._inject) == 'undefined' || typeof(options.params._content) == 'undefined')
+              throw new Error('Missing data for content replacement!')
 
             if (options.params._append) {
               document.querySelector(options.params._inject).insertAdjacentHTML('beforeend', options.params._content)
             } else {
               document.querySelector(options.params._inject).innerHTML = options.params._content
             }
-          }
-
+        }
     }
 
     private _enlargeView() {
@@ -65,10 +86,9 @@ export default class ScreenHandler {
 
     buildTemplate(file: string, params: { [x: string]: any; }) {
         if (typeof params === 'object') {
-          for (const key in params) {
-            file = file.replace(new RegExp(`{${key}}`, 'g'), params[key])
-          }
+            for (const key in params)
+                file = file.replace(new RegExp(`{${key}}`, 'g'), params[key]);
         }
-        return file
-      }
+        return file;
+    }
 }

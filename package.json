@@ -1,13 +1,14 @@
 {
     "devDependencies": {
+        "airconsole-typescript": "^1.0.2",
         "node-sass": "^4.12.0",
         "nodemon": "^1.19.3",
         "systemjs": "6.1.3",
+        "terser-webpack-plugin": "^2.3.1",
         "ts-loader": "6.2.0",
-        "typescript": "^3.6.3",
+        "typescript": "^3.7.2",
         "webpack": "^4.41.1",
-        "webpack-cli": "^3.3.9",
-        "airconsole-typescript": "^1.0.2"
+        "webpack-cli": "^3.3.9"
     },
     "dependencies": {
         "airconsole-typescript": "^1.0.2"
@@ -19,6 +20,7 @@
         "sass:watch": "chokidar 'scss/**/*.scss' -c 'npm run sass:build'",
         "tswatch": "tsc ./ts/buzzonline_master.ts --watch --target es5",
         "watch": "webpack --watch",
-        "development": "webpack"
+        "development": "webpack --env.development",
+        "production": "webpack --env.production"
     }
 }

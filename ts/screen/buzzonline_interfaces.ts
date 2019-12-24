@@ -1,38 +1,97 @@
 /**
- * The GameState interface
+ * Systematic interfaces
+ */
+export interface Observable {
+    attach(observer: Observer): void;
+    detach(observer: Observer): void;
+    notify(state: number): void;
+}
+
+export interface Observer {
+    update(state: number): void;
+}
+
+
+/**
+ * Interface iBuzzOnline
+ */
+export interface iBuzzOnline {
+    load():         void;
+    init(__assets: GameAssets): void;
+    start():        void;
+}
+
+export interface iBuzzOnlineFunctions {
+    master_change_option(device_id: number, option_data: BuzzOnlineOptions): void;
+    start_game(device_id: number): void;
+
+}
+
+export interface iBuzzOnlineAirconsoleAdapter {
+    start_device_connection_listener(): void;
+}
+
+export interface iBuzzOnlineTimer {
+    id: ReturnType<typeof setTimeout>;
+    started: Date;
+    remaining: number;
+    running: boolean;
+
+    start(): void;
+    pause(): void;
+    get_time_left(): number;
+    get_state_running(): boolean;
+}
+
+/**
+ * The BuzzOnlineOptions object
+ * 
+ * @param {boolean}         option_joker    Add Jokers to the card deck. default `false`.
+ * @param {boolean}         difficult_pyramid Shows the difficult pyramid (closed cards, in reverse order). Default `true`.
+ */
+interface BuzzOnlineOptions {
+    option_joker: boolean;
+    difficult_pyramid: boolean;
+}
+
+/**
+ * The GameState Handler interface
+ *
+ * Accesses and manipulates during a game.
+ *
+ *
+ * @interface iGameStateHandler
+ */
+export interface iGameStateHandler {
+    get(parameter: string): any;
+    set(parameter: string, data: any): void;
+}
+
+/**
+ * The GameState object
  *
  * Holds game data to be accessed and manipulated during a game.
  *
- * @param {Card[]}          cardStack       The main deck of cards currently "inactive" (ie. not in players' hands or open on the table)
- * @param {string}          currentAnswer   The answer expected from the player. Used in Phase 1.
- * @param {number}          currentCard     Keeps track of the card we're on in Phase 2 Ranges from 0 to 14.
- * @param {number}          currentPlayer   Keeps track of which player is actively playing in Phase 1, Phase Showdown and Phase 3.
- * @param {number}          currentRow      Keeps track of which row we're on in Phase 3.
- * @param {Distribution[]}  distributions   All active distributions of Phase 2.
- * @param {number}          masterDeviceId  AirConsole's Device ID of the master controller.
- * @param {string}          masterNickname  AirConsole's Nickname of the master controller.
- * @param {number}          phase           The current active phase. 0 = inactive game, 1 = Phase 1 (Dealing), 2 = Phase 2 (Pyramid), 3 = Phase 3 (Buzz)
- * @param {Player[]}        players         All active players and their information in the game.
- * @param {Showdown}        showdown        Information object for the Showdown (Phase 2)
- * @param {number}          subPhase        The current active sub-phase. Used in Phase 1 to specift which dealing round we're on.
  *
  * @interface GameState
  */
 export interface GameState {
+    inProgress:     boolean;
     cardStack:      Card[];
-    currentAnswer:  String;
-    currentCard:    Number;
-    currentPlayer:  Number;
-    currentRow:     Number;
+    currentAnswer:  string;
+    currentCard:    number;
+    currentPlayer:  number;
+    currentRow:     number;
     distributions:  Distribution[];
-    masterDeviceId: Number;
-    masterNickname: String;
-    phase:          Number;
+    masterDeviceId: number;
+    masterNickname: string;
+    phase:          number;
     players:        Player[];
     showdown:       Showdown;
-    subPhase:       Number;
-    rounds:         Number;
+    subPhase:       number;
+    rounds:         number;
 }
+
 
 /**
  * The Showdown Interface
@@ -138,12 +197,12 @@ export interface ScreenHandlerOptions {
  * @param {boolean} _restore_view   Resets the padding around the main container.
  */
 export interface ScreenHandlerOptionsParams {
-    _inject:        string;
-    _content:       string;
-    _append:        boolean;
-    _no_fadeout:    boolean;
-    _enlarge_view:  boolean;
-    _restore_view:  boolean;
+    _inject?:        string;
+    _content?:       string;
+    _append?:        boolean;
+    _no_fadeout?:    boolean;
+    _enlarge_view?:  boolean;
+    _restore_view?:  boolean;
 }
 
 

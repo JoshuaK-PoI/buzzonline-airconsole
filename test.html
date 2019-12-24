@@ -1,14 +1,67 @@
-<html>
-    <head>
-        <title>BuzzOnline Testing Sandbox</title>
-    </head>
-    <body>
-        <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
-        <script type="text/javascript" src="dist/js/app.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>BuzzOnline - SCREEN</title>
 
-        <div class="loader" style="width:50%; margin:10px; padding: 0px; border: 1px solid blue;">
-            <div class="loader--inner" style="height:24px; background-color:blue; width:20%"></div>
-            <div class="loader--text" style="position: absolute; top: 14px; width: 50%; text-align: center; color: white; text-shadow: 1px 1px 1px #000"></div>
-        </div>
-    </body>
+  <link href="https://fonts.googleapis.com/css?family=Hind+Guntur:300,400,500,600,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800&display=swap" rel="stylesheet"> 
+  <link rel="stylesheet" href="/dist/css/style.css?v=newest_300819">
+</head>
+<body>
+
+  <!-- Loader -->
+  <div class="loader-container">
+    <div class="loader">
+      <div class="loader-text">Loading...</div>
+      <div class="loader-progress">
+        <div class="loader-progress--bar"></div>
+      </div>
+    </div>
+  </div>
+  <!-- /Loader -->
+
+  <!-- Notice container -->
+  <div id="notice_container" class="notice-container"></div>
+  <!-- /Notice container -->
+  
+  <!-- Screen timer component -->
+  <div class="screen-timer" id="_screen_timer">
+      <svg class="progress-ring" width="120" height="120">
+        <circle class="progress-ring__circle" stroke="white" stroke-width="4" fill="transparent" r="52" cx="60" cy="60"/>
+      </svg>
+      <div class="screen-timer__text"></div>
+  </div>
+  <!-- /Screen timer component -->
+  
+  <!-- Banner-->
+  <div class="banner-container" id="bo_banner_placeholder">
+    
+  </div>
+  <!-- /Banner-->
+  <!-- Game viewport (NO PLACING CONTENT here; gets reset at start of game) -->
+  <div class="container hidden" id="bo_viewport">
+    
+  </div>
+  <!-- /Game viewport -->
+  <!-- Player drawer -->
+  <div class="bo-player-drawer hidden" id="bo_playerDrawer">
+  </div>
+  <!-- /Player drawer -->
+  <!-- Distri base -->
+  <div class="bo-distri-base" id="bo_distriBase">
+  </div>
+  <!-- /Distri base -->
+
+  <!-- Development build indicator-->
+  <div class="develop">
+    BuzzOnline v0.9 -- Development Build<br />
+    Visuals not final
+  </div>
+  <script type="text/javascript" src="https://www.airconsole.com/api/airconsole-1.7.0.js"></script>
+  
+  <script type="text/javascript" src="dist/js/app_development.js"></script>
+</body>
 </html>

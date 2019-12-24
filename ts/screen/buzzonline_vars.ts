@@ -8,6 +8,20 @@
     *
 ****/
 
+/* Game / Engine settings */
+export const __DEBUG_MODE:  boolean = true;
+
+export const PHS_TMOUT:     number = 2000;
+
+/* AirConsole Adapter notification states */
+export const N_GSTART:      number = 100;
+
+
+export const N_PCONNECT:    number = 201;
+export const N_PDCONNECT:   number = 202;
+export const N_PNOTIF:      number = 203;
+
+
 /* Standard Texts */
 export const SUIT_H:        string = "hearts";
 export const SUIT_S:        string = "spades";
@@ -25,7 +39,7 @@ export const HTML_BOCARD:   string = "buzzonline__playingcard_";
 
 export const METH_GET:      string = 'GET';
 
-export const RETY_ARRAYBUFFER:     XMLHttpRequestResponseType = "arraybuffer";
+export const RETY_ABFR:     XMLHttpRequestResponseType = "arraybuffer";
 export const RETY_TEXT:     XMLHttpRequestResponseType = "text";
 
 /* Player Prompts */

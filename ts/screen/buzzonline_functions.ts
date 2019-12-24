@@ -14,13 +14,4 @@ export default class Functions {
         new ScreenHandler().show(params);
     }
 
-    /**
-     * Build Template {BuildTemplate}
-     * 
-     * @param response The response HTML
-     * @param params Parameters to change
-     */
-    _bt(response, params) {
-
-    }
 }

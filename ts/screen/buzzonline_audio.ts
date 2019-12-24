@@ -5,6 +5,7 @@ export default class Audio {
     private _audioGain: GainNode;
     
     constructor() {
+        // TODO: The AudioContext cannot start before user interaction with the page.
         this._audioContext = new AudioContext();
         this._audioGain = this._audioContext.createGain();
     }
@@ -23,8 +24,7 @@ export default class Audio {
             method:         "GET",
             uri:            `./dist/audio/${file}`,
             responseType:   "arraybuffer"
-        })
-        .catch(e => {throw e});
+        }).catch(e => {throw e});
         
         return await this._audioContext.decodeAudioData(response);
     }

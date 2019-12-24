@@ -12,8 +12,8 @@ export default class Preloader {
     /**
      * Preload image and sound assets from the server.
      * 
-     * @param images Array of image files. Specify location and file extension Root is `./dist/img/`.
-     * @param sounds Array of sound files. Specify location, no file extension Root is `./dist/audio`.
+     * @param images Array of image files. Specify location and file extension. Root is `./dist/img/`.
+     * @param sounds Array of sound files. Specify location, no file extension. Root is `./dist/audio`.
      * 
      * @returns {Promise<GameAssets>} {audioBuffer, imageBuffer}
      */
@@ -60,8 +60,8 @@ export default class Preloader {
     
     private _updateProgressBar(): void {
         this._loaded++;
-        const e = <HTMLElement>document.querySelector('.loader--inner');
+        const e = <HTMLElement>document.querySelector('.loader-progress--bar');
         e.style.width = (100 * (this._loaded / this._toLoad)) + '%';
-        document.querySelector('.loader--text').innerHTML = `Loading... ${this._loaded}/${this._toLoad}`;
+        document.querySelector('.loader-text').innerHTML = `Loading... ${this._loaded}/${this._toLoad}`;
     }
 }

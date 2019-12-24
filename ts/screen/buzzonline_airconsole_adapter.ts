@@ -1,43 +1,50 @@
-/// <reference path="./buzzonline_master.ts" />
+/// <reference path="../../node_modules/airconsole-typescript/airconsole-typescript.d.ts" />
 
-import { AirConsoleData } from "./buzzonline_interfaces";
-import ControllerFunctions from "./buzzonline_controller_functions";
-import functions           from "./buzzonline_functions";
+import { iBuzzOnlineAirconsoleAdapter, AirConsoleData, Observable, Observer } from "./buzzonline_interfaces";
+import ControllerFunctions from "../controller/buzzonline_controller_functions";
+import * as _v from "./buzzonline_vars";
 
-export default class AirConsoleAdapter {
+export default class AirConsoleAdapter implements iBuzzOnlineAirconsoleAdapter, Observable {
+    
     private _isMobile: boolean;
     private _controllerFunctions: ControllerFunctions;
+    private airConsole: AirConsole;
 
     constructor(isMobile: boolean) {
         this._isMobile = isMobile;
         this._controllerFunctions = new ControllerFunctions;
+
+
+        if(!_v.__DEBUG_MODE) {
+            /* Install AirConsole API */
+            this.airConsole = new AirConsole();
+            this.airConsole.onReady = () => this.notify(_v.N_GSTART);
+        } else {
+            setTimeout(() => this.notify(_v.N_GSTART), 1000);
+        }
     }
 
-    /**
-     * Starts the AirConsole Listening event handler.
-     */
-    public airConsoleStartListeners(): void {
-        airConsole.onMessage = (device_id: number, data: AirConsoleData) => {
+    private start_device_message_listener() {
+        this.airConsole.onMessage = (device_id: number, data: AirConsoleData) => {
             switch(data.message_id) {
                 /**
                  * Controller-only functions
                  */
                 case 'JOINED_AS_SPECTATOR': 
                 /* New player has joined in an active game, so should join as spectator */
-                this._controllerFunctions.j(true);
+                this._controllerFunctions.join(true);
                 break;
                 
                 case 'JOIN_GAME': 
                 /* New player has joined an idle game */
-                this._controllerFunctions.j(false);
+                this._controllerFunctions.join(false);
                 break;
                 
                 case 'CONTROLLER_VIBRATE': 
-                /* Vibrate the controller (AirConsole function) 
+                /* Vibrate the controller
                     params: 
                         time:number | Array<number> Time in ms to vibrate the controller for, or vibration pattern
                 */
-                // NOTE: Function does not appear to exist in TS defintion file?
                 navigator.vibrate(data.params['time'])
                 break;
                 
@@ -53,12 +60,12 @@ export default class AirConsoleAdapter {
                 
                 case 'PLAYER_SHOW_CARD_DRAWER':
                 /* Show the card drawer. */
-                this._controllerFunctions.s(true);
+                this._controllerFunctions.showCardDrawer(true);
                 break;
 
                 case 'PLAYER_HIDE_CARD_DRAWER':
                 /* Hide the card drawer. */
-                this._controllerFunctions.s(false);
+                this._controllerFunctions.showCardDrawer(false);
                 break;
                 
                 case 'VIEW_UPDATE_GAMEMASTER':
@@ -175,7 +182,62 @@ export default class AirConsoleAdapter {
                         card:Card              The player's card.
                 */
                 break;
-            }            
+
+                default: 
+                    throw new Error("Error: Unknown function message received in Airconsole Adapter listener: " + data.message_id);
+            }
+        }
+    }
+
+    public start_device_connection_listener(): void | boolean {
+        if(_v.__DEBUG_MODE) {
+            console.warn("AirConsole message listener instantiation skipped, Debug mode engaged.")
+            return false;
+        }
+
+        //Start the message listener
+        this.start_device_message_listener();
+
+        //Start the AirConsole connection listeners
+        this.airConsole.onConnect    = device_id => this.device_connection_handler(device_id);
+        this.airConsole.onDisconnect = device_id => this.device_disconnection_handler(device_id);
+    }
+    
+    private device_connection_handler(device_id: number): void {
+
+        //What happens when a device connects?
+        console.log("Device connected:", this.airConsole.getNickname(device_id));
+
+        //Notify the observers
+        this.notify(_v.N_PCONNECT);
+    }
+    
+    private device_disconnection_handler(device_id: number): void {
+
+        //What happens when a device disconnects?
+        console.log("Device disconnected:", this.airConsole.getNickname(device_id));
+        
+        //Notify the observers
+        this.notify(_v.N_PDCONNECT);
+    }
+    
+    private device_send_start(device_id: number): void {
+        throw new Error("Method not implemented.");
+    }
+
+    /* Observable logic */
+    private observers: Observer[] = [];
+    
+    attach(observer: Observer): void {
+        this.observers.push(observer);
+    }
+    detach(observer: Observer): void {
+        const observerIndex = this.observers.indexOf(observer);
+        this.observers.splice(observerIndex, 1);
+    }
+    notify(state: number): void {
+        for (const observer of this.observers) {
+            observer.update(state);
         }
     }
 }
@@ -187,7 +249,9 @@ export class AirConsoleFunctions {
      * @param data The event name and accompanying parameters
      */
     public send(device_id: number, data: AirConsoleData): void {
-        airConsole.message(device_id, data);
+        // @TODO: Create Messenger in AirConsole Adapter
+        
+        //__AIRCONSOLE__.message(device_id, data);
     }
 
     /**
@@ -195,6 +259,8 @@ export class AirConsoleFunctions {
      * @param data The event name and accompanying parameters
      */
     public broadcast(data: AirConsoleData): void {
-        airConsole.message(undefined, data);
+        // @TODO: Create Messenger in AirConsole Adapter
+        
+        //__AIRCONSOLE__.message(undefined, data);
     }
 }
